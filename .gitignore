@@ -1,0 +1,6 @@
+logs/
+backend_err.log
+backend.log
+frontend_err.log
+frontend.log
+*.log
