@@ -1,9 +1,3 @@
-/**
- * Role-Based Access Control Middleware
- * Factory function that returns middleware checking if user role is in allowedRoles.
- *
- * Usage: roleMiddleware(['Admin', 'Engineering User'])
- */
 const roleMiddleware = (allowedRoles) => {
   return (req, res, next) => {
     if (!req.user) {

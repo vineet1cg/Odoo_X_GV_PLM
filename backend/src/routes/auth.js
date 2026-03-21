@@ -5,19 +5,11 @@ const User = require('../models/User');
 
 const router = express.Router();
 
-/**
- * POST /api/auth/login
- * Authenticate user and return JWT token
- * No auth required
- */
 router.post('/login', [
   body('email').isEmail().withMessage('Valid email is required'),
   body('password').notEmpty().withMessage('Password is required')
 ], async (req, res) => {
-  console.log('[ROUTE] POST /api/auth/login called');
-
   try {
-    // Validate request
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -27,8 +19,6 @@ router.post('/login', [
     }
 
     const { email, password } = req.body;
-
-    // Find user by email (include password for comparison)
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -38,7 +28,6 @@ router.post('/login', [
       });
     }
 
-    // Compare password
     const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {
@@ -48,7 +37,6 @@ router.post('/login', [
       });
     }
 
-    // Generate JWT
     const payload = {
       id: user._id,
       name: user.name,
@@ -58,8 +46,6 @@ router.post('/login', [
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '24h'
     });
-
-    console.log(`[AUTH] User logged in: ${user.email} (${user.role})`);
 
     res.json({
       success: true,
@@ -75,7 +61,6 @@ router.post('/login', [
       }
     });
   } catch (error) {
-    console.error('[AUTH] Login error:', error.message);
     res.status(500).json({
       success: false,
       message: 'Server error during authentication'

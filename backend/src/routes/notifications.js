@@ -4,14 +4,7 @@ const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
-/**
- * GET /api/notifications
- * Returns ONLY the logged-in user's notifications
- * Filtered by userId from JWT
- */
 router.get('/', authMiddleware, async (req, res) => {
-  console.log('[ROUTE] GET /api/notifications called');
-
   try {
     const notifications = await Notification.find({ userId: req.user.id })
       .populate('ecoId', 'title ecoNumber stage')
@@ -22,7 +15,6 @@ router.get('/', authMiddleware, async (req, res) => {
       data: notifications
     });
   } catch (error) {
-    console.error('[NOTIFICATIONS] List error:', error.message);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch notifications'
@@ -30,13 +22,7 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-/**
- * PATCH /api/notifications/:id/read
- * Marks notification as read
- */
 router.patch('/:id/read', authMiddleware, async (req, res) => {
-  console.log(`[ROUTE] PATCH /api/notifications/${req.params.id}/read called`);
-
   try {
     const notification = await Notification.findById(req.params.id);
 
@@ -47,7 +33,6 @@ router.patch('/:id/read', authMiddleware, async (req, res) => {
       });
     }
 
-    // Ensure user can only mark their own notifications
     if (notification.userId.toString() !== req.user.id.toString()) {
       return res.status(403).json({
         success: false,
@@ -63,7 +48,6 @@ router.patch('/:id/read', authMiddleware, async (req, res) => {
       data: notification
     });
   } catch (error) {
-    console.error('[NOTIFICATIONS] Mark read error:', error.message);
     res.status(500).json({
       success: false,
       message: 'Failed to mark notification as read'

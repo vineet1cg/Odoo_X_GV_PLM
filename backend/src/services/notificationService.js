@@ -1,9 +1,6 @@
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 
-/**
- * Create a single notification
- */
 const createNotification = async ({ userId, title, type = 'info', ecoId = null }) => {
   try {
     const notification = await Notification.create({
@@ -14,17 +11,12 @@ const createNotification = async ({ userId, title, type = 'info', ecoId = null }
       read: false
     });
 
-    console.log(`[Notification] Created for user ${userId}: "${title}"`);
     return notification;
   } catch (error) {
-    console.error('[Notification] Error creating notification:', error.message);
     throw error;
   }
 };
 
-/**
- * Notify all users with a specific role
- */
 const notifyUsersByRole = async (role, title, type = 'info', ecoId = null) => {
   try {
     const users = await User.find({ role });
@@ -40,17 +32,12 @@ const notifyUsersByRole = async (role, title, type = 'info', ecoId = null) => {
       notifications.push(notification);
     }
 
-    console.log(`[Notification] Notified ${notifications.length} ${role}(s): "${title}"`);
     return notifications;
   } catch (error) {
-    console.error('[Notification] Error notifying by role:', error.message);
     throw error;
   }
 };
 
-/**
- * Notify all Approvers when an ECO reaches Approval stage
- */
 const notifyApprovers = async (eco) => {
   return notifyUsersByRole(
     'Approver',
@@ -60,9 +47,6 @@ const notifyApprovers = async (eco) => {
   );
 };
 
-/**
- * Notify ECO creator when ECO is rejected
- */
 const notifyRejection = async (eco, rejectedBy, comment) => {
   if (!eco.createdBy) return null;
 

@@ -3,7 +3,6 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Import models
 const User = require('./src/models/User');
 const Product = require('./src/models/Product');
 const BOM = require('./src/models/BOM');
@@ -12,23 +11,20 @@ const Notification = require('./src/models/Notification');
 
 const seedDB = async () => {
   try {
-    console.log('\n🌱 Starting PLM Database Seed...\n');
+    console.log('\nStarting PLM Database Seed...\n');
 
-    // Connect to MongoDB
     await mongoose.connect(process.env.MONGO_URI);
-    console.log('✅ MongoDB connected\n');
+    console.log('MongoDB connected\n');
 
-    // Clear existing data
-    console.log('🗑️  Clearing existing data...');
+    console.log('Clearing existing data...');
     await User.deleteMany({});
     await Product.deleteMany({});
     await BOM.deleteMany({});
     await ECO.deleteMany({});
     await Notification.deleteMany({});
-    console.log('✅ All collections cleared\n');
+    console.log('All collections cleared\n');
 
-    // ─────────────── USERS ───────────────
-    console.log('👥 Creating users...');
+    console.log('Creating users...');
     const users = await User.create([
       {
         name: 'Admin User',
@@ -65,11 +61,10 @@ const seedDB = async () => {
     const approver = users[2];
     const opsUser = users[3];
 
-    console.log(`   ✅ ${users.length} users created`);
-    users.forEach(u => console.log(`      • ${u.email} (${u.role})`));
+    console.log(`${users.length} users created`);
+    users.forEach(u => console.log(`      - ${u.email} (${u.role})`));
 
-    // ─────────────── PRODUCTS ───────────────
-    console.log('\n📦 Creating products...');
+    console.log('\nCreating products...');
     const products = await Product.create([
       {
         name: 'iPhone 17',
@@ -115,10 +110,9 @@ const seedDB = async () => {
 
     const iphone = products[0];
     const chair = products[1];
-    console.log(`   ✅ ${products.length} products created`);
+    console.log(`${products.length} products created`);
 
-    // ─────────────── BOMs ───────────────
-    console.log('\n🔧 Creating BOMs...');
+    console.log('\nCreating BOMs...');
     const boms = await BOM.create([
       {
         name: 'iPhone 17 BOM',
@@ -160,20 +154,17 @@ const seedDB = async () => {
     const iphoneBom = boms[0];
     const chairBom = boms[1];
 
-    // Link BOMs to products
     iphone.bomId = iphoneBom._id;
     chair.bomId = chairBom._id;
     await iphone.save();
     await chair.save();
 
-    console.log(`   ✅ ${boms.length} BOMs created and linked to products`);
+    console.log(`${boms.length} BOMs created and linked to products`);
 
-    // ─────────────── ECOs ───────────────
-    console.log('\n📋 Creating ECOs...');
+    console.log('\nCreating ECOs...');
 
     const currentYear = new Date().getFullYear();
 
-    // ECO 1 — New stage (change iPhone 17 screw count)
     const eco1 = await ECO.create({
       title: 'Update iPhone 17 Screw Count',
       ecoNumber: `ECO-${currentYear}-001`,
@@ -204,7 +195,6 @@ const seedDB = async () => {
       ]
     });
 
-    // ECO 2 — In Review stage (update Wooden Chair price)
     const eco2 = await ECO.create({
       title: 'Update Wooden Chair Price',
       ecoNumber: `ECO-${currentYear}-002`,
@@ -241,7 +231,6 @@ const seedDB = async () => {
       ]
     });
 
-    // ECO 3 — Approval stage (change battery component)
     const eco3 = await ECO.create({
       title: 'Upgrade iPhone 17 Battery Component',
       ecoNumber: `ECO-${currentYear}-003`,
@@ -285,7 +274,6 @@ const seedDB = async () => {
       ]
     });
 
-    // ECO 4 — Done stage (already applied, version bumped)
     const eco4 = await ECO.create({
       title: 'Add Backrest to Wooden Chair',
       ecoNumber: `ECO-${currentYear}-004`,
@@ -330,15 +318,14 @@ const seedDB = async () => {
           userName: 'Approver User',
           action: 'Approved',
           timestamp: new Date(Date.now() - 86400000 * 20),
-          comment: 'Approved — backrest addition improves product value'
+          comment: 'Approved - backrest addition improves product value'
         }
       ]
     });
 
-    console.log(`   ✅ 4 ECOs created (New, In Review, Approval, Done)`);
+    console.log(`4 ECOs created (New, In Review, Approval, Done)`);
 
-    // ─────────────── NOTIFICATIONS ───────────────
-    console.log('\n🔔 Creating notifications...');
+    console.log('\nCreating notifications...');
     await Notification.create([
       {
         userId: approver._id,
@@ -362,32 +349,29 @@ const seedDB = async () => {
         read: false
       }
     ]);
-    console.log('   ✅ 3 notifications created');
+    console.log('3 notifications created');
 
-    // ─────────────── SUMMARY ───────────────
-    console.log('\n' + '═'.repeat(50));
-    console.log('🎉 DATABASE SEEDED SUCCESSFULLY!');
-    console.log('═'.repeat(50));
-    console.log('\n📊 Summary:');
-    console.log(`   • ${users.length} Users`);
-    console.log(`   • ${products.length} Products`);
-    console.log(`   • ${boms.length} BOMs`);
-    console.log(`   • 4 ECOs`);
-    console.log(`   • 3 Notifications`);
-    console.log('\n🔑 Login Credentials:');
-    console.log('   ┌──────────────────────┬───────────────┬────────────────────┐');
-    console.log('   │ Email                │ Password      │ Role               │');
-    console.log('   ├──────────────────────┼───────────────┼────────────────────┤');
-    console.log('   │ admin@plm.com        │ admin123      │ Admin              │');
-    console.log('   │ engineer@plm.com     │ engineer123   │ Engineering User   │');
-    console.log('   │ approver@plm.com     │ approver123   │ Approver           │');
-    console.log('   │ ops@plm.com          │ ops123        │ Operations User    │');
-    console.log('   └──────────────────────┴───────────────┴────────────────────┘');
+    console.log('\n' + '='.repeat(50));
+    console.log('DATABASE SEEDED SUCCESSFULLY!');
+    console.log('='.repeat(50));
+    console.log('\nSummary:');
+    console.log(`   - ${users.length} Users`);
+    console.log(`   - ${products.length} Products`);
+    console.log(`   - ${boms.length} BOMs`);
+    console.log(`   - 4 ECOs`);
+    console.log(`   - 3 Notifications`);
+    console.log('\nLogin Credentials:');
+    console.log('   ' + 'Email'.padEnd(22) + '| Password'.padEnd(13) + '| Role');
+    console.log('   ' + '-'.repeat(50));
+    console.log('   admin@plm.com'.padEnd(22) + '| admin123'.padEnd(13) + '| Admin');
+    console.log('   engineer@plm.com'.padEnd(22) + '| engineer123'.padEnd(13) + '| Engineering User');
+    console.log('   approver@plm.com'.padEnd(22) + '| approver123'.padEnd(13) + '| Approver');
+    console.log('   ops@plm.com'.padEnd(22) + '| ops123'.padEnd(13) + '| Operations User');
     console.log('\n');
 
     process.exit(0);
   } catch (error) {
-    console.error('\n❌ Seed error:', error);
+    console.error('\nSeed error:', error);
     process.exit(1);
   }
 };

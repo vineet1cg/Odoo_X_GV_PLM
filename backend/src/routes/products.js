@@ -4,18 +4,10 @@ const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
-/**
- * GET /api/products
- * Returns all products
- * Auth required, all roles
- */
 router.get('/', authMiddleware, async (req, res) => {
-  console.log('[ROUTE] GET /api/products called');
-
   try {
     let query = {};
 
-    // Operations User can only see Active products
     if (req.user.role === 'Operations User') {
       query.status = 'Active';
     }
@@ -29,7 +21,6 @@ router.get('/', authMiddleware, async (req, res) => {
       data: products
     });
   } catch (error) {
-    console.error('[PRODUCTS] List error:', error.message);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch products'
@@ -37,14 +28,7 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-/**
- * GET /api/products/:id
- * Returns single product with full versions array
- * Auth required, all roles
- */
 router.get('/:id', authMiddleware, async (req, res) => {
-  console.log(`[ROUTE] GET /api/products/${req.params.id} called`);
-
   try {
     const product = await Product.findById(req.params.id).populate('bomId');
 
@@ -55,7 +39,6 @@ router.get('/:id', authMiddleware, async (req, res) => {
       });
     }
 
-    // Operations User can only see Active products
     if (req.user.role === 'Operations User' && product.status !== 'Active') {
       return res.status(403).json({
         success: false,
@@ -68,7 +51,6 @@ router.get('/:id', authMiddleware, async (req, res) => {
       data: product
     });
   } catch (error) {
-    console.error('[PRODUCTS] Get error:', error.message);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch product'

@@ -4,14 +4,10 @@ const BOM = require('../models/BOM');
 const { createNotification } = require('./notificationService');
 const User = require('../models/User');
 
-/**
- * Generate the next ECO number in format ECO-YYYY-NNN
- */
 const generateEcoNumber = async () => {
   const currentYear = new Date().getFullYear();
   const yearPrefix = `ECO-${currentYear}-`;
 
-  // Count existing ECOs for this year
   const count = await ECO.countDocuments({
     ecoNumber: { $regex: `^${yearPrefix}` }
   });
@@ -20,17 +16,6 @@ const generateEcoNumber = async () => {
   return `${yearPrefix}${nextNumber}`;
 };
 
-/**
- * Apply an approved ECO — the core business logic.
- * Called when an ECO stage advances to 'Done'.
- *
- * 1. Generate ECO number
- * 2. Version bump (if versionUpdate is true)
- * 3. Archive old version & create new active version
- * 4. Add to version history
- * 5. Write approval log
- * 6. Create notifications
- */
 const applyECO = async (ecoId, userId) => {
   try {
     const eco = await ECO.findById(ecoId);
@@ -39,25 +24,19 @@ const applyECO = async (ecoId, userId) => {
     const user = await User.findById(userId);
     if (!user) throw new Error('User not found');
 
-    // 1. Generate ECO number if not already set
     if (!eco.ecoNumber) {
       eco.ecoNumber = await generateEcoNumber();
     }
 
-    // Get the associated product
     const product = await Product.findById(eco.productId);
     if (!product) throw new Error('Associated product not found');
 
-    // 2 & 3. Version bump and archive if versionUpdate is true
     if (eco.versionUpdate) {
-      // Parse current version number
       const currentVersionNum = parseInt(product.version.replace('v', ''), 10) || 1;
       const newVersionNum = currentVersionNum + 1;
       const newVersionStr = eco.newVersion || `v${newVersionNum}`;
 
-      // Apply changes from ECO to product fields
       if (eco.type === 'Product') {
-        // Apply field-level changes
         for (const change of eco.changes) {
           if (change.changeType === 'modified' || change.changeType === 'added') {
             const fieldName = change.fieldName.toLowerCase();
@@ -67,10 +46,8 @@ const applyECO = async (ecoId, userId) => {
           }
         }
 
-        // Update product version
         product.version = newVersionStr;
 
-        // 4. Add to version history
         product.versions.push({
           version: newVersionStr,
           date: new Date(),
@@ -85,14 +62,12 @@ const applyECO = async (ecoId, userId) => {
       if (eco.type === 'BoM' && eco.bomId) {
         const bom = await BOM.findById(eco.bomId);
         if (bom) {
-          // Apply component changes
           for (const change of eco.changes) {
             if (change.fieldName && change.fieldName.startsWith('component.')) {
               const componentName = change.fieldName.replace('component.', '');
               const existingComponent = bom.components.find(c => c.name === componentName);
 
               if (change.changeType === 'modified' && existingComponent) {
-                // Parse new value for quantity if applicable
                 const quantityMatch = change.newValue.match(/(\d+)/);
                 if (quantityMatch) {
                   existingComponent.quantity = parseInt(quantityMatch[1], 10);
@@ -112,11 +87,9 @@ const applyECO = async (ecoId, userId) => {
             }
           }
 
-          // Update BOM version
           bom.version = newVersionStr;
           await bom.save();
 
-          // Also update the product version and history
           product.version = newVersionStr;
           product.versions.push({
             version: newVersionStr,
@@ -131,7 +104,6 @@ const applyECO = async (ecoId, userId) => {
 
       eco.newVersion = newVersionStr;
     } else {
-      // No version bump — still apply field changes if any
       if (eco.type === 'Product') {
         for (const change of eco.changes) {
           if (change.changeType === 'modified' || change.changeType === 'added') {
@@ -174,11 +146,9 @@ const applyECO = async (ecoId, userId) => {
       }
     }
 
-    // Update ECO stage to Done
     eco.stage = 'Done';
     await eco.save();
 
-    // 6. Notify ECO creator that it's been approved
     if (eco.createdBy) {
       await createNotification({
         userId: eco.createdBy,
@@ -188,17 +158,12 @@ const applyECO = async (ecoId, userId) => {
       });
     }
 
-    console.log(`[ECO Service] ECO ${eco.ecoNumber} applied successfully`);
     return eco;
   } catch (error) {
-    console.error('[ECO Service] Error applying ECO:', error.message);
     throw error;
   }
 };
 
-/**
- * Add an approval log entry to an ECO
- */
 const addApprovalLog = async (ecoId, userName, action, comment = '') => {
   try {
     const eco = await ECO.findById(ecoId);
@@ -214,7 +179,6 @@ const addApprovalLog = async (ecoId, userName, action, comment = '') => {
     await eco.save();
     return eco;
   } catch (error) {
-    console.error('[ECO Service] Error adding approval log:', error.message);
     throw error;
   }
 };
