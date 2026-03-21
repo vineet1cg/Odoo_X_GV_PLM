@@ -69,7 +69,7 @@ function AnimatedRoutes() {
 //  Skips layout for '/' and '/login'        //
 // ==========================================//
 function AppLayout() {
-  const { isAuthenticated } = useApp();
+  const { isAuthenticated, isLoading } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
@@ -82,6 +82,15 @@ function AppLayout() {
   // Login page — public, no sidebar/topbar
   if (location.pathname === '/login') {
     return <Login />;
+  }
+
+  // Show loading while restoring session
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-600"></div>
+      </div>
+    );
   }
 
   // All other routes require authentication

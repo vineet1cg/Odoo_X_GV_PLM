@@ -65,7 +65,7 @@ export default function CreateEco() {
   // ==========================================//
   //  SUBMIT HANDLER — Validates + creates ECO //
   // ==========================================//
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title || !form.productId) return;
 
@@ -84,7 +84,7 @@ export default function CreateEco() {
       reviewedBy: null,
     }));
 
-    const eco = addEco({
+    const eco = await addEco({
       title: form.title,
       type: form.type,
       productId: form.productId,
@@ -100,8 +100,13 @@ export default function CreateEco() {
       imageChanges,
     });
 
-    navigate(`/eco/${eco.id}`);
+    if (eco && (eco.id || eco._id)) {
+      navigate(`/eco/${eco.id || eco._id}`);
+    } else {
+      navigate('/eco');
+    }
   };
+
 
   return (
     <div className="space-y-6 max-w-4xl">

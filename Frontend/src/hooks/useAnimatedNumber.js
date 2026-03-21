@@ -17,7 +17,7 @@ export function useAnimatedNumber(target, duration = 1200, start = true) {
 
   useEffect(() => {
     if (!start) return
-    
+
     if (prefersReduced.current) {
       setCurrent(target)
       return
@@ -33,7 +33,7 @@ export function useAnimatedNumber(target, duration = 1200, start = true) {
       const elapsed = timestamp - startTimeRef.current
       const progress = Math.min(elapsed / duration, 1)
       const eased = easeOutCubic(progress)
-      
+
       setCurrent(Math.round(eased * targetValue))
 
       if (progress < 1) {
@@ -52,3 +52,5 @@ export function useAnimatedNumber(target, duration = 1200, start = true) {
 
   return current
 }
+
+
