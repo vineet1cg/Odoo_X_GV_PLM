@@ -1,12 +1,9 @@
-const pool = require('../config/database');
-
 let isDbHealthy = true;
 let healthCheckInterval = null;
 
-const checkHealth = async () => {
+const checkHealth = async (queryFn) => {
   try {
-    const { query } = require('../config/database');
-    await query('SELECT 1');
+    await queryFn('SELECT 1');
     if (!isDbHealthy) {
       console.log('[HEALTH] ✓ Database connection restored. Resuming normal operations.');
       isDbHealthy = true;
@@ -19,11 +16,11 @@ const checkHealth = async () => {
   }
 };
 
-const startHealthCheck = (intervalMs = 15000) => {
+const startHealthCheck = (queryFn, intervalMs = 15000) => {
   if (healthCheckInterval) clearInterval(healthCheckInterval);
-  healthCheckInterval = setInterval(checkHealth, intervalMs);
+  healthCheckInterval = setInterval(() => checkHealth(queryFn), intervalMs);
   // Run once immediately
-  checkHealth();
+  checkHealth(queryFn);
 };
 
 const getStatus = () => isDbHealthy;

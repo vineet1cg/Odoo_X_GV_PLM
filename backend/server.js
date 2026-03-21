@@ -6,7 +6,7 @@ dotenv.config();
 
 // ── DB Layer ──────────────────────────────────────
 // ── DB Layer ──────────────────────────────────────
-const { initDatabases } = require('./src/config/database');
+const { initDatabases, query } = require('./src/config/database');
 const dbMiddleware = require('./src/middleware/dbMiddleware');
 
 // ── Route imports ─────────────────────────────────
@@ -110,7 +110,7 @@ if (require.main === module) {
     try {
       await initDatabases();
       startSLAMonitor();
-      startHealthCheck(15000); // Check DB every 15s
+      startHealthCheck(query, 15000); // Check DB every 15s
       app.listen(PORT, () => {
         console.log(`\n[SERVER] PLM Flow running on http://localhost:${PORT}`);
         console.log(`[SERVER] CORS enabled for localhost:5173/5174`);
