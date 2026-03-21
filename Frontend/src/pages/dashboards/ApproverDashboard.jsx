@@ -4,8 +4,10 @@ import Card from '../../components/ui/Card';
 import StatusBadge from '../../components/ui/StatusBadge';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function ApproverDashboard() {
+  const { t } = useTranslation();
   const { ecoList } = useApp();
 
   const pendingApprovals = ecoList.filter(e => e.stage === 'Approval');
@@ -14,19 +16,19 @@ export default function ApproverDashboard() {
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-surface-800 tracking-tight">Approvals Dashboard</h1>
-        <p className="text-sm text-surface-500 mt-1">Review and sign off on pending Engineering Change Orders</p>
+        <h1 className="text-2xl font-bold text-surface-800 tracking-tight">{t('dashboards.app_title')}</h1>
+        <p className="text-sm text-surface-500 mt-1">{t('dashboards.app_sub')}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <Card title="Pending Review" value={pendingApprovals.length} subtitle="Awaiting your signature" icon={Inbox} color="primary" delay={0} />
-        <Card title="Urgent Actions" value={urgentApprovals.length} subtitle="High priority ECOs" icon={AlertTriangle} color="danger" delay={1} />
-        <Card title="Completed Today" value="0" subtitle="Recently approved" icon={CheckCircle} color="success" delay={2} />
+        <Card title={t('dashboards.pending_review')} value={pendingApprovals.length} subtitle={t('dashboards.awaiting_sig')} icon={Inbox} color="primary" delay={0} />
+        <Card title={t('dashboards.urgent_actions')} value={urgentApprovals.length} subtitle={t('dashboards.high_priority')} icon={AlertTriangle} color="danger" delay={1} />
+        <Card title={t('dashboards.completed_today')} value="0" subtitle={t('dashboards.recently_approved')} icon={CheckCircle} color="success" delay={2} />
       </div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-surface-100 rounded-xl border border-surface-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-surface-100 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-surface-800">ECOs Assigned to Me</h2>
+          <h2 className="text-base font-semibold text-surface-800">{t('dashboards.assigned_to_me')}</h2>
         </div>
         <div className="divide-y divide-surface-100">
           {pendingApprovals.length > 0 ? pendingApprovals.map(eco => (
@@ -34,19 +36,19 @@ export default function ApproverDashboard() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-mono text-surface-400">{eco.ecoNumber}</span>
-                  {eco.priority === 'High' && <span className="text-[10px] bg-danger-100 text-danger-700 px-1.5 py-0.5 rounded font-bold uppercase">Urgent</span>}
+                  {eco.priority === 'High' && <span className="text-[10px] bg-danger-100 text-danger-700 px-1.5 py-0.5 rounded font-bold uppercase">{t('priority.High')}</span>}
                 </div>
                 <p className="text-sm font-medium text-surface-800 truncate">{eco.title}</p>
-                <p className="text-xs text-surface-400 mt-0.5">Submitted by {eco.createdByName}</p>
+                <p className="text-xs text-surface-400 mt-0.5">{t('dashboards.submitted_by', 'Submitted by')} {eco.createdByName}</p>
               </div>
               <button className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg shadow-sm">
-                Review Diff
+                {t('dashboards.review_diff')}
               </button>
             </Link>
           )) : (
             <div className="px-6 py-12 text-center">
               <CheckCircle size={32} className="mx-auto text-success-400 mb-3" />
-              <p className="text-surface-500 font-medium">You're all caught up!</p>
+              <p className="text-surface-500 font-medium">{t('dashboards.all_caught_up')}</p>
             </div>
           )}
         </div>

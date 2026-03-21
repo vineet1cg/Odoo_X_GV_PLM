@@ -5,8 +5,10 @@ import StatusBadge from '../components/ui/StatusBadge';
 import EmptyState from '../components/ui/EmptyState';
 import { Search, Layers, ArrowUpRight, Plus, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function BillOfMaterials() {
+  const { t } = useTranslation();
   const { fetchPaginatedBoms, canCreateEco } = useApp();
   const [boms, setBoms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,15 +56,15 @@ export default function BillOfMaterials() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-surface-800 tracking-tight">Bills of Materials</h1>
-          <p className="text-sm text-surface-500 mt-1">Component structures and manufacturing operations</p>
+          <h1 className="text-2xl font-bold text-surface-800 tracking-tight">{t('boms.title')}</h1>
+          <p className="text-sm text-surface-500 mt-1">{t('boms.subtitle')}</p>
         </div>
         {canCreateEco && (
           <Link
             to="/bom/create"
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm hover:shadow-md"
           >
-            <Plus size={16} /> New BoM
+            <Plus size={16} /> {t('boms.new_bom')}
           </Link>
         )}
       </div>
@@ -74,7 +76,7 @@ export default function BillOfMaterials() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search BoMs..."
+          placeholder={t('boms.search')}
           className="w-full pl-10 pr-4 py-2 rounded-lg border border-surface-200 bg-surface-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400 transition"
         />
       </div>
@@ -83,10 +85,10 @@ export default function BillOfMaterials() {
       {isLoading ? (
         <div className="bg-surface-100 sm:rounded-xl sm:border border-surface-200 py-20 flex flex-col items-center justify-center space-y-4">
           <Loader2 className="animate-spin text-primary-600" size={32} />
-          <p className="text-surface-500 font-medium">Loading Bills of Materials...</p>
+          <p className="text-surface-500 font-medium">{t('boms.loading')}</p>
         </div>
       ) : boms.length === 0 ? (
-        <EmptyState title="No BoMs found" description="Try adjusting your search." icon={Layers} />
+        <EmptyState title={t('boms.no_boms')} description={t('boms.no_results')} icon={Layers} />
       ) : (
         <>
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-surface-100 sm:rounded-xl sm:border border-surface-200 overflow-hidden">
@@ -95,11 +97,11 @@ export default function BillOfMaterials() {
             <table className="w-full min-w-[800px]">
             <thead>
               <tr className="bg-surface-50 border-b border-surface-200">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">BoM Name</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Product</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Version</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Components</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Status</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('boms.bom_name')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('eco.product')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('products.version')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('boms.components')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('products.status')}</th>
                 <th className="px-6 py-3"></th>
               </tr>
             </thead>
@@ -124,14 +126,14 @@ export default function BillOfMaterials() {
                     <span className="text-sm font-semibold text-surface-700">v{bom.version}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm text-surface-500">{bom.components?.length || 0} parts</span>
+                    <span className="text-sm text-surface-500">{bom.components?.length || 0} {t('boms.parts')}</span>
                   </td>
                   <td className="px-6 py-4">
                     <StatusBadge status={bom.status} />
                   </td>
                   <td className="px-6 py-4 text-right">
                     <Link to={`/bom/${bom.id || bom._id}`} className="opacity-0 group-hover:opacity-100 inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700 transition-all">
-                      View <ArrowUpRight size={12} />
+                      {t('actions.view')} <ArrowUpRight size={12} />
                     </Link>
                   </td>
                 </motion.tr>
@@ -164,12 +166,12 @@ export default function BillOfMaterials() {
                 
                 <div className="grid grid-cols-2 gap-2 mb-4">
                   <div>
-                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">Version</p>
+                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">{t('products.version')}</p>
                     <p className="text-sm text-surface-700 font-medium">v{bom.version}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">Components</p>
-                    <p className="text-sm text-surface-700 font-medium">{bom.components?.length || 0} parts</p>
+                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">{t('boms.components')}</p>
+                    <p className="text-sm text-surface-700 font-medium">{bom.components?.length || 0} {t('boms.parts')}</p>
                   </div>
                 </div>
 
@@ -177,7 +179,7 @@ export default function BillOfMaterials() {
                   to={`/bom/${bom.id || bom._id}`}
                   className="w-full inline-flex justify-center items-center gap-2 py-2.5 bg-surface-50 hover:bg-surface-100 text-surface-700 font-medium text-sm rounded-lg transition-colors border border-surface-200"
                 >
-                  View BoM <ArrowUpRight size={14} />
+                  {t('boms.view_bom')} <ArrowUpRight size={14} />
                 </Link>
               </motion.div>
             ))}
@@ -187,7 +189,7 @@ export default function BillOfMaterials() {
         {/* Pagination Controls */}
         <div className="px-6 py-4 border-t border-surface-200 bg-surface-50 flex items-center justify-between rounded-xl shadow-sm mt-4">
           <p className="text-sm text-surface-500">
-            Showing <span className="font-medium text-surface-800">{(page - 1) * limit + 1}</span> to <span className="font-medium text-surface-800">{Math.min(page * limit, totalBoms)}</span> of <span className="font-medium text-surface-800">{totalBoms}</span> BoMs
+            {t('admin.showing')} <span className="font-medium text-surface-800">{(page - 1) * limit + 1}</span> {t('admin.to')} <span className="font-medium text-surface-800">{Math.min(page * limit, totalBoms)}</span> {t('admin.of')} <span className="font-medium text-surface-800">{totalBoms}</span> {t('nav.boms')}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -195,17 +197,17 @@ export default function BillOfMaterials() {
               disabled={page === 1}
               className="inline-flex items-center gap-1 px-3 py-1.5 border border-surface-300 rounded-lg text-sm font-medium text-surface-700 bg-white hover:bg-surface-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronLeft size={16} /> Previous
+              <ChevronLeft size={16} /> {t('admin.prev')}
             </button>
             <div className="px-3 py-1.5 text-sm font-medium text-surface-700">
-              Page {page} of {totalPages}
+              {t('admin.page')} {page} {t('admin.of')} {totalPages}
             </div>
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
               className="inline-flex items-center gap-1 px-3 py-1.5 border border-surface-300 rounded-lg text-sm font-medium text-surface-700 bg-white hover:bg-surface-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Next <ChevronRight size={16} />
+              {t('admin.next')} <ChevronRight size={16} />
             </button>
           </div>
         </div>

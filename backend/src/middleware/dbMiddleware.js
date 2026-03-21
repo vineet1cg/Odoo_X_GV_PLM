@@ -1,8 +1,7 @@
-const { dbQuery, getDBStatus, getCurrentDB } = require('../config/database');
+const { query, getDBStatus } = require('../config/database');
 
 module.exports = function dbMiddleware(req, res, next) {
-  req.db       = dbQuery;
+  req.db = query;
   req.dbStatus = getDBStatus;
-  req.currentDB = getCurrentDB;
   next();
 };

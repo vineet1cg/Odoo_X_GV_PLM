@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { ArrowUpRight, ArrowDownRight, Minus, AlertTriangle, CheckCircle, ShieldAlert, Clock, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { secureGet } from '../../capacitor/nativeServices';
+import { useTranslation } from 'react-i18next';
 
 export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
+  const { t } = useTranslation();
   const [impact, setImpact] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,7 +26,7 @@ export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
         if (data.success && isMounted) {
           setImpact(data.data);
         } else if (isMounted) {
-          setError(data.message || 'Failed to analyze impact');
+          setError(data.message || t('eco.impact_fail', 'Failed to analyze impact'));
         }
       } catch (err) {
         if (isMounted) setError(err.toString());
@@ -86,13 +88,13 @@ export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
       <div className="flex items-start justify-between mb-6 relative z-10">
         <div>
           <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            Predicted Impact Analysis
+            {t('eco.impact_analysis', 'Predicted Impact Analysis')}
           </h2>
-          <p className="text-sm text-slate-500 mt-1">Calculated intelligently before you approve</p>
+          <p className="text-sm text-slate-500 mt-1">{t('eco.impact_analysis_desc', 'Calculated intelligently before you approve')}</p>
         </div>
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold font-mono tracking-widest ${riskStyles[riskLevel]}`}>
           <div className={`w-2 h-2 rounded-full ${riskCircle[riskLevel]}`} />
-          {riskLevel} RISK
+          {t(`status.${riskLevel.toLowerCase()}`, riskLevel)} {t('eco.risk', 'RISK')}
         </div>
       </div>
 
@@ -100,7 +102,7 @@ export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
         {/* Cost Impact */}
         <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2 flex justify-between items-center">
-            Net Cost Change
+            {t('eco.net_cost_change', 'Net Cost Change')}
           </div>
           <div className="flex items-center gap-2">
             <span className={`text-3xl font-black ${
@@ -112,10 +114,10 @@ export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
             {costImpact.direction === 'decrease' && <ArrowDownRight className="text-green-600" size={24} />}
             {costImpact.direction === 'neutral' && <Minus className="text-slate-400" size={24} />}
           </div>
-          <p className="text-xs text-slate-500 mt-2 font-medium">per unit produced</p>
+          <p className="text-xs text-slate-500 mt-2 font-medium">{t('eco.per_unit_produced', 'per unit produced')}</p>
           <div className="mt-4 pt-3 border-t border-slate-200/60">
             <p className="text-[11px] text-slate-600">
-              Total impact <strong className="text-slate-800">{costImpact.direction === 'increase' ? '+' : ''}{formatCurrency(costImpact.total)}</strong> across active orders
+              {t('eco.total_impact', 'Total impact')} <strong className="text-slate-800">{costImpact.direction === 'increase' ? '+' : ''}{formatCurrency(costImpact.total)}</strong> {t('eco.across_orders', 'across active orders')}
             </p>
           </div>
         </div>
@@ -123,7 +125,7 @@ export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
         {/* Time Impact */}
         <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2 flex justify-between items-center">
-            Labor / Time Change
+            {t('eco.labor_time_change', 'Labor / Time Change')}
           </div>
           <div className="flex items-baseline gap-1">
             <span className={`text-3xl font-black ${
@@ -131,12 +133,12 @@ export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
             }`}>
               {timeImpact.direction === 'increase' ? '+' : ''}{Math.abs(timeImpact.perUnit)}
             </span>
-            <span className="text-sm font-bold text-slate-500">mins</span>
+            <span className="text-sm font-bold text-slate-500">{t('common.mins', 'mins')}</span>
           </div>
           <p className="text-xs text-slate-500 mt-2 font-medium">per unit assembled</p>
           <div className="mt-4 pt-3 border-t border-slate-200/60">
             <p className="text-[11px] text-slate-600 flex items-center gap-1">
-              <Clock size={12} /> Total <strong className="text-slate-800">{timeImpact.direction === 'increase' ? '+' : ''}{timeImpact.total} hours</strong> capacity change
+              <Clock size={12} /> {t('common.total', 'Total')} <strong className="text-slate-800">{timeImpact.direction === 'increase' ? '+' : ''}{timeImpact.total} {t('common.hours', 'hours')}</strong> {t('eco.capacity_change', 'capacity change')}
             </p>
           </div>
         </div>
@@ -144,16 +146,16 @@ export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
         {/* Orders Affected */}
         <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2 flex justify-between items-center">
-            Production Scope
+            {t('eco.production_scope', 'Production Scope')}
           </div>
           <div className="flex items-baseline gap-1">
             <span className="text-3xl font-black text-amber-600">{affectedOrders.count}</span>
-            <span className="text-sm font-bold text-amber-700/70">WIP orders</span>
+            <span className="text-sm font-bold text-amber-700/70">{t('eco.wip_orders', 'WIP orders')}</span>
           </div>
           <p className="text-xs text-slate-500 mt-2 font-medium">active in manufacturing</p>
           <div className="mt-4 pt-3 border-t border-slate-200/60">
             <p className="text-[11px] text-slate-600 flex items-center gap-1">
-              <Package size={12} /> <strong className="text-slate-800">{affectedOrders.totalUnits.toLocaleString()} total units</strong> immediately affected
+              <Package size={12} /> <strong className="text-slate-800">{affectedOrders.totalUnits.toLocaleString()} {t('common.total_units', 'total units')}</strong> {t('eco.immediately_affected', 'immediately affected')}
             </p>
           </div>
         </div>
@@ -165,9 +167,9 @@ export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
             onClick={() => setExpanded(!expanded)}
             className="w-full px-4 py-3 bg-slate-50 flex items-center justify-between text-sm font-bold text-slate-700 hover:bg-slate-100 transition-colors"
           >
-            Breakdown of Direct Changes
+            {t('eco.direct_changes_breakdown', 'Breakdown of Direct Changes')}
             <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
-              {expanded ? 'Hide Details' : 'View Components'}
+              {expanded ? t('actions.hide_details', 'Hide Details') : t('actions.view_components', 'View Components')}
             </span>
           </button>
           <AnimatePresence>
@@ -182,9 +184,9 @@ export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
                   <table className="w-full text-sm text-left">
                     <thead className="bg-slate-50 text-xs uppercase text-slate-500 border-b border-slate-200">
                       <tr>
-                        <th className="px-4 py-2 font-semibold">Component / Field</th>
-                        <th className="px-4 py-2 font-semibold">Change</th>
-                        <th className="px-4 py-2 font-semibold text-right">Unit Impact</th>
+                        <th className="px-4 py-2 font-semibold">{t('eco.component_field', 'Component / Field')}</th>
+                        <th className="px-4 py-2 font-semibold">{t('eco.change', 'Change')}</th>
+                        <th className="px-4 py-2 font-semibold text-right">{t('eco.unit_impact', 'Unit Impact')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -225,7 +227,7 @@ export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
            <CheckCircle size={20} className="text-teal-600" />}
         </div>
         <div>
-          <h4 className="font-bold text-sm mb-0.5">System Recommendation</h4>
+          <h4 className="font-bold text-sm mb-0.5">{t('eco.system_recommendation', 'System Recommendation')}</h4>
           <p className="text-sm font-medium opacity-90">{recommendation}</p>
         </div>
       </div>

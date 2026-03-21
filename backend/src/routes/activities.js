@@ -1,5 +1,4 @@
 const express = require('express');
-const Activity = require('../models/Activity');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
@@ -7,8 +6,8 @@ const router = express.Router();
 // GET /api/activities — List activity timeline, most recent first
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const activities = await Activity.find().sort({ timestamp: -1 });
-    res.json({ success: true, data: activities });
+    const result = await req.db('SELECT * FROM activities ORDER BY created_at DESC');
+    res.json({ success: true, data: result.rows });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch activities' });
   }
@@ -18,17 +17,17 @@ router.get('/', authMiddleware, async (req, res) => {
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { type, title, description, user, ecoId } = req.body;
-    const activity = await Activity.create({
-      id: `a${Date.now()}`,
-      type,
-      title,
-      description,
-      timestamp: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-      user,
-      ecoId: ecoId || null
-    });
-    res.status(201).json({ success: true, data: activity });
+    const id = `a${Date.now()}`;
+    
+    const result = await req.db(
+      `INSERT INTO activities (id, type, title, description, user_name, eco_id, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING *`,
+      [id, type, title, description, user, ecoId || null]
+    );
+
+    res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error) {
+    console.error('[ACTIVITIES PROB]', error);
     res.status(500).json({ success: false, message: 'Failed to create activity' });
   }
 });

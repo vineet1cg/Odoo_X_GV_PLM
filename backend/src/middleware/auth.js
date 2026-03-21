@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -13,10 +12,15 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findOne({ _id: decoded.id }).select('-password');
+    // Use SQL via req.db
+    const result = await req.db(
+      'SELECT id, name, email, role FROM users WHERE id = $1',
+      [decoded.id]
+    );
+
+    const user = result.rows[0];
 
     if (!user) {
       return res.status(401).json({

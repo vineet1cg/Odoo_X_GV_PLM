@@ -5,6 +5,7 @@ import {
   Send, Edit3, Trash2, CheckCircle, XCircle, ShieldAlert,
   ChevronDown, AlertTriangle, Eye
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * ECOActionBar — Role-aware action buttons for ECO detail pages.
@@ -19,6 +20,7 @@ export default function ECOActionBar({
   onDelete,
   onForceAdvance,
 }) {
+  const { t } = useTranslation();
   const { canCreateECO, canApproveECO, isAdmin, isOperations, isEngineer, isApprover } = useRoleAccess();
   const [showConfirm, setShowConfirm] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
@@ -47,7 +49,7 @@ export default function ECOActionBar({
       >
         <Eye size={16} style={{ color: '#64748B' }} />
         <span style={{ fontSize: 13, color: '#64748B', fontWeight: 500 }}>
-          You have view-only access to this ECO.
+          {t('eco.view_only_access', 'You have view-only access to this ECO.')}
         </span>
       </div>
     );
@@ -76,27 +78,27 @@ export default function ECOActionBar({
             onMouseEnter={e => { e.target.style.transform = 'scale(1.01)'; }}
             onMouseLeave={e => { e.target.style.transform = 'scale(1)'; }}
           >
-            <Send size={14} /> Submit for Review
+            <Send size={14} /> {t('actions.submit_for_review', 'Submit for Review')}
           </button>
           <button style={outlineBtn} onClick={onEdit}
             onMouseEnter={e => { e.target.style.background = '#F8FAFC'; }}
             onMouseLeave={e => { e.target.style.background = 'transparent'; }}
           >
-            <Edit3 size={14} /> Edit ECO
+            <Edit3 size={14} /> {t('actions.edit_eco', 'Edit ECO')}
           </button>
           {stage === 'New' && (
             <button style={dangerBtn} onClick={() => setShowConfirm('delete')}
               onMouseEnter={e => { e.target.style.background = '#FEF2F2'; }}
               onMouseLeave={e => { e.target.style.background = 'transparent'; }}
             >
-              <Trash2 size={14} /> Delete
+              <Trash2 size={14} /> {t('actions.delete', 'Delete')}
             </button>
           )}
         </>
       );
     }
     if (stage === 'Approval') {
-      return <span style={disabledBadge}><ShieldAlert size={14} /> Awaiting Approval</span>;
+      return <span style={disabledBadge}><ShieldAlert size={14} /> {t('status.awaiting_approval', 'Awaiting Approval')}</span>;
     }
     return null;
   };
@@ -109,20 +111,20 @@ export default function ECOActionBar({
             onMouseEnter={e => { e.target.style.transform = 'scale(1.01)'; }}
             onMouseLeave={e => { e.target.style.transform = 'scale(1)'; }}
           >
-            <CheckCircle size={14} /> Approve
+            <CheckCircle size={14} /> {t('actions.approve', 'Approve')}
           </button>
           <button style={dangerBtn} onClick={() => setShowConfirm('reject')}
             onMouseEnter={e => { e.target.style.background = '#FEF2F2'; }}
             onMouseLeave={e => { e.target.style.background = 'transparent'; }}
           >
-            <XCircle size={14} /> Reject
+            <XCircle size={14} /> {t('actions.reject', 'Reject')}
           </button>
         </>
       );
     }
     return (
       <span style={disabledBadge}>
-        <AlertTriangle size={14} /> Not yet in approval
+        <AlertTriangle size={14} /> {t('status.not_in_approval', 'Not yet in approval')}
       </span>
     );
   };
@@ -140,20 +142,20 @@ export default function ECOActionBar({
             {(stage === 'New' || stage === 'In Review') && (
               <>
                 <button style={primaryBtn} onClick={() => setShowConfirm('submit')}>
-                  <Send size={14} /> Submit for Review
+                  <Send size={14} /> {t('actions.submit_for_review', 'Submit for Review')}
                 </button>
                 <button style={outlineBtn} onClick={onEdit}>
-                  <Edit3 size={14} /> Edit ECO
+                  <Edit3 size={14} /> {t('actions.edit_eco', 'Edit ECO')}
                 </button>
               </>
             )}
             {stage === 'Approval' && (
               <>
                 <button style={successBtn} onClick={() => setShowConfirm('approve')}>
-                  <CheckCircle size={14} /> Approve
+                  <CheckCircle size={14} /> {t('actions.approve', 'Approve')}
                 </button>
                 <button style={dangerBtn} onClick={() => setShowConfirm('reject')}>
-                  <XCircle size={14} /> Reject
+                  <XCircle size={14} /> {t('actions.reject', 'Reject')}
                 </button>
               </>
             )}
@@ -163,7 +165,7 @@ export default function ECOActionBar({
                   style={{ ...outlineBtn, gap: 6 }}
                   onClick={() => setShowAdminMenu(!showAdminMenu)}
                 >
-                  Force Advance <ChevronDown size={12} />
+                  {t('actions.force_advance', 'Force Advance')} <ChevronDown size={12} />
                 </button>
                 {showAdminMenu && (
                   <div style={{
@@ -208,12 +210,12 @@ export default function ECOActionBar({
             {showConfirm === 'reject' ? (
               <>
                 <p style={{ fontSize: 14, fontWeight: 600, color: '#0F172A', marginBottom: 12 }}>
-                  Rejection Reason <span style={{ color: '#EF4444' }}>*</span>
+                  {t('eco.rejection_reason', 'Rejection Reason')} <span style={{ color: '#EF4444' }}>*</span>
                 </p>
                 <textarea
                   value={rejectReason}
                   onChange={e => setRejectReason(e.target.value)}
-                  placeholder="Please provide a detailed reason (min 20 characters)..."
+                  placeholder={t('eco.rejection_placeholder', 'Please provide a detailed reason (min 20 characters)...')}
                   rows={3}
                   style={{
                     width: '100%', padding: '10px 12px', borderRadius: 8, fontSize: 13,
@@ -225,16 +227,16 @@ export default function ECOActionBar({
                 />
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
                   <span style={{ fontSize: 11, color: rejectReason.length >= 20 ? '#10B981' : '#94A3B8' }}>
-                    {rejectReason.length}/20 characters minimum
+                    {rejectReason.length}/{t('eco.char_min', { min: 20 }, '20 characters minimum')}
                   </span>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button style={outlineBtn} onClick={() => { setShowConfirm(null); setRejectReason(''); }}>Cancel</button>
+                    <button style={outlineBtn} onClick={() => { setShowConfirm(null); setRejectReason(''); }}>{t('actions.cancel', 'Cancel')}</button>
                     <button
                       style={{ ...btnBase, background: rejectReason.length >= 20 ? '#EF4444' : '#FCA5A5', color: '#fff', cursor: rejectReason.length >= 20 ? 'pointer' : 'not-allowed' }}
                       onClick={handleConfirmAction}
                       disabled={rejectReason.length < 20}
                     >
-                      Confirm Rejection
+                      {t('actions.confirm_rejection', 'Confirm Rejection')}
                     </button>
                   </div>
                 </div>
@@ -242,12 +244,12 @@ export default function ECOActionBar({
             ) : (
               <>
                 <p style={{ fontSize: 14, fontWeight: 600, color: '#0F172A', marginBottom: 12 }}>
-                  {showConfirm === 'submit' && 'Submit this ECO for review?'}
-                  {showConfirm === 'approve' && 'Approve this ECO? Changes will be applied to production.'}
-                  {showConfirm === 'delete' && 'Delete this ECO? This action cannot be undone.'}
+                  {showConfirm === 'submit' && t('eco.confirm_submit', 'Submit this ECO for review?')}
+                  {showConfirm === 'approve' && t('eco.confirm_approve', 'Approve this ECO? Changes will be applied to production.')}
+                  {showConfirm === 'delete' && t('eco.confirm_delete', 'Delete this ECO? This action cannot be undone.')}
                 </p>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button style={outlineBtn} onClick={() => setShowConfirm(null)}>Cancel</button>
+                  <button style={outlineBtn} onClick={() => setShowConfirm(null)}>{t('actions.cancel', 'Cancel')}</button>
                   <button
                     style={{
                       ...btnBase,
@@ -256,7 +258,7 @@ export default function ECOActionBar({
                     }}
                     onClick={handleConfirmAction}
                   >
-                    Confirm
+                    {t('actions.confirm', 'Confirm')}
                   </button>
                 </div>
               </>

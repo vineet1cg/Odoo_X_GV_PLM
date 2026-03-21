@@ -5,8 +5,10 @@ import ImagePreviewModal from '../components/ui/ImagePreviewModal';
 import { ArrowLeft, AlertTriangle, Lock, GitBranch, ExternalLink, FileText, ImageIcon, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function ProductDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { products, bomList, ecoList } = useApp();
   const product = products.find(p => p.id === id);
@@ -16,7 +18,7 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-surface-400">Product not found.</p>
+        <p className="text-surface-400">{t('products.not_found', 'Product not found.')}</p>
       </div>
     );
   }
@@ -28,7 +30,7 @@ export default function ProductDetail() {
     <div className="space-y-6">
       {/* Back */}
       <Link to="/products" className="inline-flex items-center gap-2 text-sm text-surface-500 hover:text-surface-700 transition-colors">
-        <ArrowLeft size={16} /> Back to Products
+        <ArrowLeft size={16} /> {t('actions.back_to_products', 'Back to Products')}
       </Link>
 
       {/* Edit Warning */}
@@ -39,8 +41,8 @@ export default function ProductDetail() {
       >
         <Lock size={18} className="text-warning-600 mt-0.5" />
         <div>
-          <p className="text-sm font-semibold text-warning-700">Editing Disabled</p>
-          <p className="text-sm text-warning-600">Direct editing of product data is not allowed. All changes must be submitted via an <Link to="/eco" className="underline font-medium">Engineering Change Order (ECO)</Link>.</p>
+          <p className="text-sm font-semibold text-warning-700">{t('products.editing_disabled', 'Editing Disabled')}</p>
+          <p className="text-sm text-warning-600">{t('products.editing_disabled_desc_part1', 'Direct editing of product data is not allowed. All changes must be submitted via an')} <Link to="/eco" className="underline font-medium">{t('products.editing_disabled_desc_link', 'Engineering Change Order (ECO)')}</Link>.</p>
         </div>
       </motion.div>
 
@@ -55,7 +57,7 @@ export default function ProductDetail() {
             <p className="text-sm text-surface-500 font-mono">{product.sku}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-surface-400">Current Version</p>
+            <p className="text-sm text-surface-400">{t('boms.current_version')}</p>
             <p className="text-2xl font-bold text-primary-600">v{product.version}</p>
           </div>
         </div>
@@ -63,10 +65,10 @@ export default function ProductDetail() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Category', value: product.category },
-            { label: 'Price', value: `$${product.price.toLocaleString()}` },
-            { label: 'Weight', value: product.weight },
-            { label: 'Material', value: product.material },
+            { label: t('products.category'), value: product.category },
+            { label: t('products.price'), value: `$${product.price.toLocaleString()}` },
+            { label: t('products.weight'), value: product.weight },
+            { label: t('products.material'), value: product.material },
           ].map(item => (
             <div key={item.label} className="bg-surface-50 rounded-lg p-3">
               <p className="text-xs text-surface-400 font-medium mb-1">{item.label}</p>
@@ -81,8 +83,8 @@ export default function ProductDetail() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-surface-100 rounded-xl border border-surface-200 p-6">
           <div className="flex items-center gap-2 mb-4">
             <ImageIcon size={16} className="text-surface-400" />
-            <h2 className="text-base font-semibold text-surface-800">Product Images</h2>
-            <span className="text-xs bg-surface-100 text-surface-500 font-medium px-2 py-0.5 rounded-full">{product.images.length} approved</span>
+            <h2 className="text-base font-semibold text-surface-800">{t('products.images', 'Product Images')}</h2>
+            <span className="text-xs bg-surface-100 text-surface-500 font-medium px-2 py-0.5 rounded-full">{product.images.length} {t('products.approved', 'approved')}</span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {product.images.map((img, idx) => (
@@ -97,7 +99,7 @@ export default function ProductDetail() {
                 </div>
                 <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2">
                   <p className="text-[10px] text-white font-medium truncate">{img.name}</p>
-                  <span className="text-[9px] bg-success-500 text-white px-1.5 py-0.5 rounded-full font-bold">✓ Approved</span>
+                  <span className="text-[9px] bg-success-500 text-white px-1.5 py-0.5 rounded-full font-bold">✓ {t('products.approved', 'Approved')}</span>
                 </div>
               </div>
             ))}
@@ -110,7 +112,7 @@ export default function ProductDetail() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-surface-100 rounded-xl border border-surface-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-surface-100 flex items-center gap-2">
             <GitBranch size={16} className="text-surface-400" />
-            <h2 className="text-base font-semibold text-surface-800">Version History</h2>
+            <h2 className="text-base font-semibold text-surface-800">{t('boms.version_history', 'Version History')}</h2>
           </div>
           <div className="px-6 py-4">
             {product.versions.map((v, idx) => (
@@ -146,17 +148,17 @@ export default function ProductDetail() {
           {bom && (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-surface-100 rounded-xl border border-surface-200 overflow-hidden">
               <div className="px-6 py-4 border-b border-surface-100 flex items-center justify-between">
-                <h2 className="text-base font-semibold text-surface-800">Attached BoM</h2>
+                <h2 className="text-base font-semibold text-surface-800">{t('products.attached_bom', 'Attached BoM')}</h2>
                 <Link to={`/bom/${bom.id}`} className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1">
-                  View BoM <ExternalLink size={12} />
+                  {t('actions.view_bom', 'View BoM')} <ExternalLink size={12} />
                 </Link>
               </div>
               <div className="px-6 py-4">
                 <p className="text-sm font-medium text-surface-700">{bom.name}</p>
                 <div className="flex items-center gap-3 mt-2">
-                  <span className="text-xs text-surface-400">Version: <span className="font-semibold text-surface-600">v{bom.version}</span></span>
+                  <span className="text-xs text-surface-400">{t('boms.version')}: <span className="font-semibold text-surface-600">v{bom.version}</span></span>
                   <StatusBadge status={bom.status} />
-                  <span className="text-xs text-surface-400">{bom.components.length} components</span>
+                  <span className="text-xs text-surface-400">{bom.components.length} {t('boms.components', 'components')}</span>
                 </div>
               </div>
             </motion.div>
@@ -167,7 +169,7 @@ export default function ProductDetail() {
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-surface-100 rounded-xl border border-surface-200 overflow-hidden">
               <div className="px-6 py-4 border-b border-surface-100 flex items-center gap-2">
                 <FileText size={16} className="text-surface-400" />
-                <h2 className="text-base font-semibold text-surface-800">Related ECOs</h2>
+                <h2 className="text-base font-semibold text-surface-800">{t('products.related_ecos', 'Related ECOs')}</h2>
               </div>
               <div className="divide-y divide-surface-100">
                 {relatedEcos.map(eco => (

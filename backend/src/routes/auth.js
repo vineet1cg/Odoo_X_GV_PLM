@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
-const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
@@ -21,7 +21,14 @@ router.post('/login', [
     }
 
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    
+    // SQL query to find user
+    const result = await req.db(
+      'SELECT id, name, email, password, role, avatar FROM users WHERE email = $1',
+      [email.toLowerCase()]
+    );
+
+    const user = result.rows[0];
 
     if (!user) {
       return res.status(401).json({
@@ -30,7 +37,8 @@ router.post('/login', [
       });
     }
 
-    const isMatch = await user.comparePassword(password);
+    // Compare password using bcryptjs
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -64,6 +72,7 @@ router.post('/login', [
       }
     });
   } catch (error) {
+    console.error('[AUTH PROB]', error);
     res.status(500).json({
       success: false,
       message: 'Server error during authentication'
@@ -74,10 +83,19 @@ router.post('/login', [
 // GET /api/auth/me — Get current user from token
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.user.id });
+    // Current user is already attached to req.user by authMiddleware
+    // But we re-fetch to ensure we have latest data
+    const result = await req.db(
+      'SELECT id, name, email, role, avatar FROM users WHERE id = $1',
+      [req.user.id]
+    );
+
+    const user = result.rows[0];
+    
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
+
     res.json({
       success: true,
       data: {

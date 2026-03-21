@@ -13,12 +13,16 @@ import ImagePreviewModal from '../components/ui/ImagePreviewModal';
 import ImpactPredictor from '../components/ECO/ImpactPredictor';
 import SLATimer from '../components/ECO/SLATimer';
 import ExportPDFButton from '../components/ECO/ExportPDFButton';
+import RiskAnalyzer from '../components/ECO/RiskAnalyzer';
+import QRCodeModal from '../components/ECO/QRCodeModal';
 import { ArrowLeft, User, Calendar, FileText, Clock, CheckCircle, XCircle, Send, AlertCircle, MessageSquare, ImageIcon, Paperclip } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { secureGet } from '../capacitor/nativeServices';
+import { useTranslation } from 'react-i18next';
 
 export default function EcoDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { ecoList, updateEcoStage, rejectEco, reviewEcoImage, canApprove, canEditDraft, currentUser, isReadOnly } = useApp();
   const eco = ecoList.find(e => e.id === id);
@@ -50,7 +54,7 @@ export default function EcoDetail() {
   if (!eco) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-surface-400">ECO not found.</p>
+        <p className="text-surface-400">{t('eco.not_found')}</p>
       </div>
     );
   }
@@ -66,7 +70,7 @@ export default function EcoDetail() {
   //  SUBMIT — Sends ECO to approval stage     //
   // ==========================================//
   const handleSubmitForApproval = () => {
-    updateEcoStage(eco.id, 'Approval', comment || 'Submitted for approval review.');
+    updateEcoStage(eco.id, 'Approval', comment || t('eco.submitted_for_approval'));
     setComment('');
     setShowConfirm(null);
   };
@@ -75,7 +79,7 @@ export default function EcoDetail() {
   //  APPROVE — Moves ECO to 'Done' stage      //
   // ==========================================//
   const handleApprove = () => {
-    updateEcoStage(eco.id, 'Done', comment || 'Approved. Changes applied to production.');
+    updateEcoStage(eco.id, 'Done', comment || t('eco.approved_changes_applied'));
     setComment('');
     setShowConfirm(null);
   };
@@ -84,7 +88,7 @@ export default function EcoDetail() {
   //  REJECT — Resets ECO back to 'New'        //
   // ==========================================//
   const handleReject = () => {
-    rejectEco(eco.id, comment || 'Rejected. Changes need revision.');
+    rejectEco(eco.id, comment || t('eco.rejected_changes_revision'));
     setComment('');
     setShowConfirm(null);
   };
@@ -101,7 +105,7 @@ export default function EcoDetail() {
   return (
     <div className="space-y-6">
       <Link to="/eco" className="inline-flex items-center gap-2 text-sm text-surface-500 hover:text-surface-700 transition-colors">
-        <ArrowLeft size={16} /> Back to ECOs
+        <ArrowLeft size={16} /> {t('actions.back_to_ecos')}
       </Link>
 
       {/* ECO Header */}
@@ -114,7 +118,7 @@ export default function EcoDetail() {
               <StatusBadge status={eco.priority} />
               {attachedImages.length > 0 && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold ring-1 ring-inset ring-indigo-500/20">
-                  <Paperclip size={10} /> {attachedImages.length} image{attachedImages.length !== 1 ? 's' : ''}
+                  <Paperclip size={10} /> {attachedImages.length} {attachedImages.length !== 1 ? t('eco.images') : t('eco.image')}
                 </span>
               )}
             </div>
@@ -122,7 +126,10 @@ export default function EcoDetail() {
           </div>
           <div className="flex flex-row md:flex-col items-center md:items-end gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
             <StatusBadge status={eco.stage} size="lg" />
-            <ExportPDFButton eco={eco} />
+            <div className="flex items-center gap-2">
+              <QRCodeModal eco={eco} />
+              <ExportPDFButton eco={eco} />
+            </div>
           </div>
         </div>
         {eco.description && (
@@ -133,28 +140,28 @@ export default function EcoDetail() {
           <div className="flex items-center gap-2">
             <User size={14} className="text-surface-400" />
             <div>
-              <p className="text-xs text-surface-400">Created By</p>
+              <p className="text-xs text-surface-400">{t('eco.created_by')}</p>
               <p className="text-sm font-medium text-surface-700">{eco.createdByName}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Calendar size={14} className="text-surface-400" />
             <div>
-              <p className="text-xs text-surface-400">Created</p>
+              <p className="text-xs text-surface-400">{t('eco.created')}</p>
               <p className="text-sm font-medium text-surface-700">{eco.createdAt}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Clock size={14} className="text-surface-400" />
             <div>
-              <p className="text-xs text-surface-400">Effective Date</p>
+              <p className="text-xs text-surface-400">{t('eco.effective_date')}</p>
               <p className="text-sm font-medium text-surface-700">{eco.effectiveDate || '—'}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <FileText size={14} className="text-surface-400" />
             <div>
-              <p className="text-xs text-surface-400">Product</p>
+              <p className="text-xs text-surface-400">{t('eco.product')}</p>
               <Link to={`/products/${eco.productId}`} className="text-sm font-medium text-primary-600 hover:underline">{eco.productName}</Link>
             </div>
           </div>
@@ -162,7 +169,7 @@ export default function EcoDetail() {
 
         {eco.versionUpdate && eco.newVersion && (
           <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-primary-50 rounded-lg">
-            <span className="text-xs text-primary-600 font-medium">Version update:</span>
+            <span className="text-xs text-primary-600 font-medium">{t('eco.version_update')}</span>
             <span className="text-xs font-bold text-primary-700">→ v{eco.newVersion}</span>
           </div>
         )}
@@ -173,7 +180,7 @@ export default function EcoDetail() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
           <SLATimer
             enteredAt={slaData.enteredAt}
-            stage={slaData.stage}
+            stage={eco.stage}
             slaStatus={slaData.slaStatus}
             percentageUsed={slaData.percentageUsed}
             warnThreshold={slaData.warnThreshold}
@@ -185,7 +192,7 @@ export default function EcoDetail() {
 
       {/* Stage Progress */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-surface-100 rounded-xl border border-surface-200 p-6">
-        <h2 className="text-base font-semibold text-surface-800 mb-6">Approval Workflow</h2>
+        <h2 className="text-base font-semibold text-surface-800 mb-6">{t('eco.approval_workflow')}</h2>
         <StageProgress currentStage={eco.stage} />
       </motion.div>
 
@@ -213,7 +220,7 @@ export default function EcoDetail() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="bg-surface-100 rounded-xl border border-surface-200 p-6">
           <div className="flex items-center gap-2 mb-4">
             <ImageIcon size={16} className="text-surface-400" />
-            <h3 className="text-sm font-semibold text-surface-700 uppercase tracking-wider">Attached Images</h3>
+            <h3 className="text-sm font-semibold text-surface-700 uppercase tracking-wider">{t('eco.attached_images')}</h3>
             <span className="text-xs text-surface-400 font-medium">({attachedImages.length})</span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -225,7 +232,7 @@ export default function EcoDetail() {
               >
                 <img src={img.url} alt={img.name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = '/logo.svg'; e.target.className = 'w-1/2 h-1/2 object-contain opacity-20'; }} loading="lazy" />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                  <span className="text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Preview</span>
+                  <span className="text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">{t('actions.preview')}</span>
                 </div>
                 <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2">
                   <p className="text-[10px] text-white font-medium truncate">{img.name}</p>
@@ -243,17 +250,17 @@ export default function EcoDetail() {
       {/* ======================================== */}
       {!isReadOnly && eco.stage !== 'Done' && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-surface-100 rounded-xl border border-surface-200 p-6">
-          <h2 className="text-base font-semibold text-surface-800 mb-4">Actions</h2>
+          <h2 className="text-base font-semibold text-surface-800 mb-4">{t('eco.actions', 'Actions')}</h2>
 
           {/* Comment Input */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-surface-600 mb-1.5">Comment (optional)</label>
+            <label className="block text-sm font-medium text-surface-600 mb-1.5">{t('eco.comment_optional', 'Comment (optional)')}</label>
             <div className="relative">
               <MessageSquare size={16} className="absolute left-3 top-3 text-surface-400" />
               <textarea
                 value={comment}
                 onChange={e => setComment(e.target.value)}
-                placeholder="Add a comment for the approval log..."
+                placeholder={t('eco.comment_ph', 'Add a comment for the approval log...')}
                 rows={2}
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-surface-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400 transition resize-none"
               />
@@ -267,7 +274,7 @@ export default function EcoDetail() {
                 onClick={() => setShowConfirm('submit')}
                 className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-primary-600 text-white text-base font-bold rounded-xl hover:bg-primary-700 transition-colors shadow-sm"
               >
-                <Send size={20} /> Submit for Approval Review
+                <Send size={20} /> {t('actions.submit_approval', 'Submit for Approval Review')}
               </button>
             )}
 
@@ -283,27 +290,30 @@ export default function EcoDetail() {
 
             {/* Standalone Approve / Reject Buttons — always visible for approvers */}
             {canApprove && !['Done', 'Rejected'].includes(eco.stage) && (
-              <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-surface-200">
-                <button
+              <>
+                {eco.stage === 'Approval' && <RiskAnalyzer ecoId={eco.id || eco._id} />}
+                <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-surface-200">
+                  <button
                   onClick={() => setShowConfirm('approve')}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
                 >
-                  <CheckCircle size={18} /> Approve ECO
+                  <CheckCircle size={18} /> {t('actions.approve_eco', 'Approve ECO')}
                 </button>
                 <button
                   onClick={() => setShowConfirm('reject')}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-colors shadow-sm"
                 >
-                  <XCircle size={18} /> Reject ECO
+                  <XCircle size={18} /> {t('actions.reject_eco', 'Reject ECO')}
                 </button>
               </div>
+              </>
             )}
 
             {/* No action available info */}
             {!canEditDraft && !canApprove && (
               <div className="flex items-center gap-2 text-sm text-surface-400">
                 <AlertCircle size={16} />
-                <span>You do not have permission to perform actions on this ECO.</span>
+                <span>{t('eco.no_permission')}</span>
               </div>
             )}
           </div>
@@ -316,9 +326,9 @@ export default function EcoDetail() {
               className="mt-4 p-4 bg-surface-50 rounded-lg border border-surface-200"
             >
               <p className="text-sm font-medium text-surface-700 mb-3">
-                {showConfirm === 'submit' && 'Are you sure you want to submit this ECO for approval?'}
-                {showConfirm === 'approve' && 'Are you sure you want to approve this ECO? Changes (including images) will be applied to production.'}
-                {showConfirm === 'reject' && 'Are you sure you want to reject this ECO? It will be returned to draft and images will be sent back for revision.'}
+                {showConfirm === 'submit' && t('eco.confirm_submit')}
+                {showConfirm === 'approve' && t('eco.confirm_approve')}
+                {showConfirm === 'reject' && t('eco.confirm_reject')}
               </p>
               <div className="flex items-center gap-2">
                 <button
@@ -331,13 +341,13 @@ export default function EcoDetail() {
                     showConfirm === 'reject' ? 'bg-danger-600 hover:bg-danger-700' : 'bg-primary-600 hover:bg-primary-700'
                   }`}
                 >
-                  Confirm
+                  {t('actions.confirm')}
                 </button>
                 <button
                   onClick={() => setShowConfirm(null)}
                   className="px-4 py-2 text-sm font-medium text-surface-600 bg-surface-100 border border-surface-200 rounded-lg hover:bg-surface-50 transition-colors"
                 >
-                  Cancel
+                  {t('actions.cancel')}
                 </button>
               </div>
             </motion.div>
@@ -349,7 +359,7 @@ export default function EcoDetail() {
       {eco.approvalLogs && eco.approvalLogs.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-surface-100 rounded-xl border border-surface-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-surface-100">
-            <h2 className="text-base font-semibold text-surface-800">Approval Log</h2>
+            <h2 className="text-base font-semibold text-surface-800">{t('eco.approval_log', 'Approval Log')}</h2>
           </div>
           <div className="px-6 py-4 space-y-0">
             {eco.approvalLogs.map((log, idx) => {

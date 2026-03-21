@@ -8,6 +8,7 @@ import { LayoutDashboard, Package, Layers, FileText, BarChart3, Settings, Chevro
 import { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // ==========================================//
 //  ROLE NAV MAP — Different menu per role   //
@@ -18,35 +19,36 @@ import { motion, AnimatePresence } from 'framer-motion';
 // ==========================================//
 const roleNavMap = {
   'Admin': [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/users', icon: Users, label: 'User Management' },
-    { to: '/eco-stages', icon: GitMerge, label: 'ECO Stages' },
-    { to: '/rules', icon: ShieldCheck, label: 'Approval Rules' },
-    { to: '/reports', icon: BarChart3, label: 'Reports' },
-    { to: '/settings', icon: Settings, label: 'Settings' },
+    { to: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard', fallback: 'Dashboard' },
+    { to: '/users', icon: Users, labelKey: 'admin.users', fallback: 'User Management' },
+    { to: '/eco-stages', icon: GitMerge, labelKey: 'nav.eco_stages', fallback: 'ECO Stages' },
+    { to: '/rules', icon: ShieldCheck, labelKey: 'nav.approval_rules', fallback: 'Approval Rules' },
+    { to: '/reports', icon: BarChart3, labelKey: 'nav.reports', fallback: 'Reports' },
+    { to: '/settings', icon: Settings, labelKey: 'nav.settings', fallback: 'Settings' },
   ],
   'Engineering User': [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/products', icon: Package, label: 'Products' },
-    { to: '/bom', icon: Layers, label: 'Bills of Materials' },
-    { to: '/eco/create', icon: PlusCircle, label: 'Create ECO' },
-    { to: '/eco', icon: FileText, label: 'My ECOs' },
+    { to: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard', fallback: 'Dashboard' },
+    { to: '/products', icon: Package, labelKey: 'nav.products', fallback: 'Products' },
+    { to: '/bom', icon: Layers, labelKey: 'nav.boms', fallback: 'Bills of Materials' },
+    { to: '/eco/create', icon: PlusCircle, labelKey: 'eco.create', fallback: 'Create ECO' },
+    { to: '/eco', icon: FileText, labelKey: 'nav.ecos', fallback: 'My ECOs' },
   ],
   'Approver': [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/eco', icon: Inbox, label: 'Pending Approvals' },
-    { to: '/reports', icon: BarChart3, label: 'Reports' },
+    { to: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard', fallback: 'Dashboard' },
+    { to: '/eco', icon: Inbox, labelKey: 'nav.ecos_pending', fallback: 'Pending Approvals' },
+    { to: '/reports', icon: BarChart3, labelKey: 'nav.reports', fallback: 'Reports' },
   ],
   'Operations User': [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/products', icon: Package, label: 'Products (Active)' },
-    { to: '/bom', icon: Layers, label: 'BoM (Active)' },
+    { to: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard', fallback: 'Dashboard' },
+    { to: '/products', icon: Package, labelKey: 'nav.products_active', fallback: 'Products (Active)' },
+    { to: '/bom', icon: Layers, labelKey: 'nav.boms_active', fallback: 'BoM (Active)' },
   ],
 };
 
 export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, setCollapsed }) {
   const { currentUser } = useApp();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const filteredNav = roleNavMap[currentUser.role] || roleNavMap['Engineering User'];
 
@@ -103,7 +105,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
                 PLM
               </h1>
               <p className="text-[9px] leading-tight text-surface-500 font-bold tracking-widest uppercase mt-1">
-                Change Control
+                {t('landing.logo_subtitle', 'Change Control')}
               </p>
             </div>
           )}
@@ -141,14 +143,14 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
                   ? 'bg-surface-200 text-primary-900 shadow-sm border border-surface-300/50'
                   : 'text-surface-600 hover:bg-surface-50 hover:text-primary-800'
               }`}
-              title={collapsed ? item.label : undefined}
+              title={collapsed ? t(item.labelKey, item.fallback) : undefined}
             >
               <Icon size={20} className={`flex-shrink-0 transition-colors ${isActive ? 'text-primary-800' : 'text-surface-500 group-hover:text-primary-700'}`} />
               {(!collapsed || mobileMenuOpen) && (
                   <span
                     className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${mobileMenuOpen ? 'w-auto opacity-100' : 'w-0 opacity-0 group-hover:w-auto group-hover:opacity-100 lg:w-auto lg:opacity-100'} ${collapsed ? '!w-0 !opacity-0' : ''}`}
                   >
-                    {item.label}
+                    {t(item.labelKey, item.fallback)}
                   </span>
                 )}
             </NavLink>
@@ -166,7 +168,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
               <span
                 className="text-xs font-medium"
               >
-                Collapse
+                {t('common.collapse', 'Collapse')}
               </span>
             )}
         </button>

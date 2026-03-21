@@ -3,8 +3,10 @@ import { useApp } from '../context/AppContext';
 import StatusBadge from '../components/ui/StatusBadge';
 import { ArrowLeft, Lock, Wrench, Cog } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function BomDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { bomList } = useApp();
   const bom = bomList.find(b => b.id === id);
@@ -12,7 +14,7 @@ export default function BomDetail() {
   if (!bom) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-surface-400">BoM not found.</p>
+        <p className="text-surface-400">{t('boms.not_found', 'BoM not found.')}</p>
       </div>
     );
   }
@@ -22,7 +24,7 @@ export default function BomDetail() {
   return (
     <div className="space-y-6">
       <Link to="/bom" className="inline-flex items-center gap-2 text-sm text-surface-500 hover:text-surface-700 transition-colors">
-        <ArrowLeft size={16} /> Back to BoMs
+        <ArrowLeft size={16} /> {t('actions.back_to_boms', 'Back to BoMs')}
       </Link>
 
       {/* Edit Warning */}
@@ -33,8 +35,8 @@ export default function BomDetail() {
       >
         <Lock size={18} className="text-warning-600 mt-0.5" />
         <div>
-          <p className="text-sm font-semibold text-warning-700">Editing Disabled</p>
-          <p className="text-sm text-warning-600">BoM changes must go through an <Link to="/eco" className="underline font-medium">Engineering Change Order (ECO)</Link>.</p>
+          <p className="text-sm font-semibold text-warning-700">{t('products.editing_disabled', 'Editing Disabled')}</p>
+          <p className="text-sm text-warning-600">{t('boms.editing_disabled_desc_part1', 'BoM changes must go through an')} <Link to="/eco" className="underline font-medium">{t('products.editing_disabled_desc_link', 'Engineering Change Order (ECO)')}</Link>.</p>
         </div>
       </motion.div>
 
@@ -49,7 +51,7 @@ export default function BomDetail() {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm text-surface-400">Version</p>
+            <p className="text-sm text-surface-400">{t('boms.version')}</p>
             <p className="text-2xl font-bold text-primary-600">v{bom.version}</p>
           </div>
         </div>
@@ -60,8 +62,8 @@ export default function BomDetail() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="lg:col-span-2 bg-surface-100 sm:rounded-xl sm:border border-surface-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-surface-100 flex items-center gap-2">
             <Wrench size={16} className="text-surface-400" />
-            <h2 className="text-base font-semibold text-surface-800">Components</h2>
-            <span className="text-xs text-surface-400 ml-auto">{bom.components.length} parts · Total cost: ${totalCost.toFixed(2)}</span>
+            <h2 className="text-base font-semibold text-surface-800">{t('boms.components', 'Components')}</h2>
+            <span className="text-xs text-surface-400 ml-auto">{bom.components.length} {t('boms.parts', 'parts')} · {t('boms.total_cost', 'Total cost:')} ${totalCost.toFixed(2)}</span>
           </div>
           
           {/* Desktop/Tablet Table View */}
@@ -69,11 +71,11 @@ export default function BomDetail() {
             <table className="w-full min-w-[700px]">
             <thead>
               <tr className="bg-surface-50 border-b border-surface-200">
-                <th className="text-left px-6 py-2.5 text-xs font-semibold text-surface-400 uppercase">Part Name</th>
-                <th className="text-left px-6 py-2.5 text-xs font-semibold text-surface-400 uppercase">Part Number</th>
-                <th className="text-right px-6 py-2.5 text-xs font-semibold text-surface-400 uppercase">Qty</th>
-                <th className="text-right px-6 py-2.5 text-xs font-semibold text-surface-400 uppercase">Unit Cost</th>
-                <th className="text-right px-6 py-2.5 text-xs font-semibold text-surface-400 uppercase">Subtotal</th>
+                <th className="text-left px-6 py-2.5 text-xs font-semibold text-surface-400 uppercase">{t('boms.part_name', 'Part Name')}</th>
+                <th className="text-left px-6 py-2.5 text-xs font-semibold text-surface-400 uppercase">{t('boms.part_number', 'Part Number')}</th>
+                <th className="text-right px-6 py-2.5 text-xs font-semibold text-surface-400 uppercase">{t('boms.qty', 'Qty')}</th>
+                <th className="text-right px-6 py-2.5 text-xs font-semibold text-surface-400 uppercase">{t('boms.unit_cost', 'Unit Cost')}</th>
+                <th className="text-right px-6 py-2.5 text-xs font-semibold text-surface-400 uppercase">{t('boms.subtotal', 'Subtotal')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-100">
@@ -101,16 +103,16 @@ export default function BomDetail() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-surface-800">${(c.cost * c.quantity).toFixed(2)}</p>
-                    <p className="text-[10px] text-surface-400">Subtotal</p>
+                    <p className="text-[10px] text-surface-400">{t('boms.subtotal', 'Subtotal')}</p>
                   </div>
                 </div>
                 <div className="flex justify-between items-center bg-surface-50 rounded-lg p-2.5">
                   <div className="text-center flex-1 border-r border-surface-200">
-                    <p className="text-[10px] text-surface-400 font-semibold uppercase">Qty</p>
+                    <p className="text-[10px] text-surface-400 font-semibold uppercase">{t('boms.qty', 'Qty')}</p>
                     <p className="text-sm font-medium text-surface-700">{c.quantity} {c.unit}</p>
                   </div>
                   <div className="text-center flex-1">
-                    <p className="text-[10px] text-surface-400 font-semibold uppercase">Unit Cost</p>
+                    <p className="text-[10px] text-surface-400 font-semibold uppercase">{t('boms.unit_cost', 'Unit Cost')}</p>
                     <p className="text-sm font-medium text-surface-700">${c.cost.toFixed(2)}</p>
                   </div>
                 </div>
@@ -123,7 +125,7 @@ export default function BomDetail() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-surface-100 rounded-xl border border-surface-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-surface-100 flex items-center gap-2">
             <Cog size={16} className="text-surface-400" />
-            <h2 className="text-base font-semibold text-surface-800">Operations</h2>
+            <h2 className="text-base font-semibold text-surface-800">{t('boms.operations', 'Operations')}</h2>
           </div>
           <div className="divide-y divide-surface-100">
             {bom.operations.map((op, idx) => (

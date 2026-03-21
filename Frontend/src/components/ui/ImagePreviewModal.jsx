@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function ImagePreviewModal({ images, initialIndex = 0, isOpen, onClose }) {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
@@ -52,7 +54,7 @@ export default function ImagePreviewModal({ images, initialIndex = 0, isOpen, on
           <div className="flex items-center justify-between px-6 py-3 bg-black/40 rounded-t-xl">
             <div>
               <p className="text-sm font-medium text-white">{currentImage.name}</p>
-              <p className="text-xs text-white/60">{currentImage.category} · {currentIndex + 1} of {images.length}</p>
+              <p className="text-xs text-white/60">{currentImage.category} · {currentIndex + 1} {t('common.of', 'of')} {images.length}</p>
             </div>
             <div className="flex items-center gap-2">
               <button onClick={() => setZoom(z => Math.max(0.25, z - 0.25))} className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-surface-100/10 transition-colors"><ZoomOut size={18} /></button>

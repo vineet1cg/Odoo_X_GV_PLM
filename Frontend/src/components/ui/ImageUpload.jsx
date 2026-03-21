@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback } from 'react';
 import { Upload, X, FileImage, Clock, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function ImageUpload({ images = [], onImagesChange, disabled = false, maxFiles = 10, maxSizeMB = 10 }) {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
@@ -102,10 +104,10 @@ export default function ImageUpload({ images = [], onImagesChange, disabled = fa
           </div>
           <div>
             <p className="text-sm font-medium text-surface-700">
-              {isDragging ? 'Drop files here' : 'Drag & drop files or click to browse'}
+              {isDragging ? t('image_upload.drop_here', 'Drop files here') : t('image_upload.drag_drop', 'Drag & drop files or click to browse')}
             </p>
             <p className="text-xs text-surface-400 mt-1">
-              JPG, PNG, WebP, PDF · Max {maxSizeMB}MB per file · {maxFiles - images.length} slots remaining
+              {t('image_upload.formats', { max: maxSizeMB, remaining: maxFiles - images.length }, `JPG, PNG, WebP, PDF · Max ${maxSizeMB}MB per file · ${maxFiles - images.length} slots remaining`)}
             </p>
           </div>
         </div>
@@ -127,7 +129,7 @@ export default function ImageUpload({ images = [], onImagesChange, disabled = fa
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium text-primary-700">Uploading...</span>
+                  <span className="text-xs font-medium text-primary-700">{t('image_upload.uploading', 'Uploading...')}</span>
                   <span className="text-xs text-primary-500">{Math.round(progress)}%</span>
                 </div>
                 <div className="w-full h-1.5 bg-primary-100 rounded-full overflow-hidden">
@@ -203,7 +205,7 @@ export default function ImageUpload({ images = [], onImagesChange, disabled = fa
                     img.reviewStatus === 'rejected' ? 'bg-danger-500 text-white' :
                     'bg-warning-500 text-white'
                   }`}>
-                    {img.reviewStatus === 'approved' ? '✓ Approved' : img.reviewStatus === 'rejected' ? '✗ Rejected' : '● Pending'}
+                    {img.reviewStatus === 'approved' ? `✓ ${t('status.approved', 'Approved')}` : img.reviewStatus === 'rejected' ? `✗ ${t('status.rejected', 'Rejected')}` : `● ${t('status.pending', 'Pending')}`}
                   </div>
                 )}
               </motion.div>
@@ -216,7 +218,7 @@ export default function ImageUpload({ images = [], onImagesChange, disabled = fa
       {!disabled && (
         <div className="flex items-start gap-2 text-xs text-surface-400">
           <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
-          <span>Uploaded images are part of this ECO and will only be applied to the product after approval. They do not replace existing images until the ECO is completed.</span>
+          <span>{t('image_upload.hint', 'Uploaded images are part of this ECO and will only be applied to the product after approval. They do not replace existing images until the ECO is completed.')}</span>
         </div>
       )}
 

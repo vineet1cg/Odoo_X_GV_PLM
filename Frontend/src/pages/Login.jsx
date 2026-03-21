@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Eye, EyeOff, Component, CheckCircle, Package, Hexagon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function Login() {
+  const { t } = useTranslation();
   const { login, users } = useApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -110,10 +112,10 @@ export default function Login() {
 
           {/* Heading */}
           <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 tracking-tight leading-snug">
-            Welcome back!
+            {t('auth.welcome_back')}
           </h1>
           <p className="text-surface-400 mb-8 text-[15px] leading-relaxed">
-            Sign in to manage your engineering change orders and product lifecycle.
+            {t('auth.login_subtitle')}
           </p>
 
           {/* Error Message */}
@@ -128,7 +130,7 @@ export default function Login() {
             <div>
               <input
                 type="email"
-                placeholder="Email address"
+                placeholder={t('auth.email')}
                 className="w-full px-5 py-[14px] rounded-2xl border border-surface-200 bg-white focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all placeholder:text-surface-400 font-medium text-[15px]"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -137,7 +139,7 @@ export default function Login() {
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Password"
+                placeholder={t('auth.password')}
                 className="w-full px-5 py-[14px] rounded-2xl border border-surface-200 bg-white focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all placeholder:text-surface-400 font-medium text-[15px] tracking-widest"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -153,7 +155,7 @@ export default function Login() {
 
             <div className="flex justify-end">
               <span className="text-[13px] font-semibold text-surface-400 cursor-not-allowed select-none">
-                Forgot Password?
+                {t('auth.forgot')}
               </span>
             </div>
 
@@ -162,7 +164,7 @@ export default function Login() {
               disabled={loading}
               className="w-full py-[15px] bg-primary-900 text-white rounded-2xl font-bold text-[15px] hover:bg-primary-800 active:scale-[0.99] transition-all shadow-lg shadow-primary-900/20 mt-1 disabled:opacity-60"
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? t('auth.signing_in') : t('auth.login')}
             </button>
           </form>
 
@@ -170,7 +172,7 @@ export default function Login() {
           <div className="mt-8 lg:hidden block">
             <div className="flex items-center gap-4 mb-5">
               <div className="flex-1 h-px bg-surface-200" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-surface-400">Demo Accounts</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-surface-400">{t('auth.demo_accounts')}</span>
               <div className="flex-1 h-px bg-surface-200" />
             </div>
 
@@ -199,9 +201,9 @@ export default function Login() {
 
           {/* Footer */}
           <p className="mt-8 text-center text-[13px] font-medium text-surface-400">
-            Not a member?{' '}
+            {t('auth.not_member')}{' '}
             <a href="#" className="text-primary-700 hover:text-primary-900 hover:underline font-bold">
-              Contact Admin
+              {t('auth.contact_admin')}
             </a>
           </p>
 
@@ -307,7 +309,7 @@ export default function Login() {
             
             {/* PLM Brand Tag */}
             <div className="flex flex-col items-center gap-1.5 mb-6">
-              <p className="text-[13px] font-medium text-surface-400 text-center">Make your lifecycle easier and organized with</p>
+              <p className="text-[13px] font-medium text-surface-400 text-center">{t('auth.make_easier')}</p>
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
                   <img src="/logo.svg" alt="PLM Logo" className="w-full h-full object-contain" />
@@ -326,7 +328,7 @@ export default function Login() {
             {/* Divider */}
             <div className="w-[90%] flex items-center gap-3 mb-5">
               <div className="flex-1 h-px bg-[#d9c4aa]/40" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#b68a56]">Quick Login</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#b68a56]">{t('auth.quick_login')}</span>
               <div className="flex-1 h-px bg-[#d9c4aa]/40" />
             </div>
 

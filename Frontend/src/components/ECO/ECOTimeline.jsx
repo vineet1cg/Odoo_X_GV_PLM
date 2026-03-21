@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Plus, ArrowRight, Check, X, Tag, Bell, Clock } from 'lucide-react';
 import { timeAgo, formatDateTime } from '../../utils/dateUtils';
 import useStaggeredAnimation from '../../hooks/useStaggeredAnimation';
+import { useTranslation } from 'react-i18next';
 
 const EVENT_CONFIG = {
   'ECO Created':              { icon: Plus, bg: '#0D9488', color: '#fff' },
@@ -18,16 +19,16 @@ function getEventConfig(action) {
   return EVENT_CONFIG[key] || EVENT_CONFIG['ECO Created'];
 }
 
-function getDurationBetween(from, to) {
+function getDurationBetween(from, to, t) {
   const fromD = new Date(from);
   const toD = new Date(to);
   const diffMs = Math.abs(toD - fromD);
   const hours = Math.floor(diffMs / (1000 * 60 * 60));
   const days = Math.floor(hours / 24);
-  if (days > 0) return `${days} day${days !== 1 ? 's' : ''} later`;
-  if (hours > 0) return `${hours} hour${hours !== 1 ? 's' : ''} later`;
+  if (days > 0) return `${days} ${t(days === 1 ? 'time.day_later' : 'time.days_later', 'days later')}`;
+  if (hours > 0) return `${hours} ${t(hours === 1 ? 'time.hour_later' : 'time.hours_later', 'hours later')}`;
   const mins = Math.floor(diffMs / (1000 * 60));
-  return `${mins} minute${mins !== 1 ? 's' : ''} later`;
+  return `${mins} ${t(mins === 1 ? 'time.minute_later' : 'time.minutes_later', 'minutes later')}`;
 }
 
 function getInitials(name) {
@@ -39,6 +40,7 @@ function getInitials(name) {
  * ECOTimeline — Vertical timeline of ECO approval history with staggered animations.
  */
 export default function ECOTimeline({ approvalLogs = [], ecoId, createdAt, createdBy }) {
+  const { t } = useTranslation();
   const allEvents = useMemo(() => {
     const events = [];
     if (createdAt) {
@@ -65,9 +67,9 @@ export default function ECOTimeline({ approvalLogs = [], ecoId, createdAt, creat
         padding: 48, textAlign: 'center', fontFamily: 'Inter, system-ui, sans-serif',
       }}>
         <Clock size={36} style={{ color: '#CBD5E1', margin: '0 auto 12px' }} />
-        <p style={{ fontSize: 14, fontWeight: 600, color: '#64748B' }}>No activity yet</p>
+        <p style={{ fontSize: 14, fontWeight: 600, color: '#64748B' }}>{t('eco.no_activity', 'No activity yet')}</p>
         <p style={{ fontSize: 13, color: '#94A3B8', marginTop: 4 }}>
-          Timeline events will appear as this ECO progresses.
+          {t('eco.timeline_wait', 'Timeline events will appear as this ECO progresses.')}
         </p>
       </div>
     );
@@ -78,13 +80,13 @@ export default function ECOTimeline({ approvalLogs = [], ecoId, createdAt, creat
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
         <Clock size={15} style={{ color: '#64748B' }} />
         <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A', letterSpacing: '-0.02em', margin: 0 }}>
-          Approval Timeline
+          {t('eco.approval_timeline', 'Approval Timeline')}
         </h3>
         <span style={{
           padding: '2px 8px', borderRadius: 9999, fontSize: 11, fontWeight: 600,
           background: '#CCFBF1', color: '#0D9488',
         }}>
-          {allEvents.length} event{allEvents.length !== 1 ? 's' : ''}
+          {allEvents.length} {allEvents.length === 1 ? t('eco.event', 'event') : t('eco.events', 'events')}
         </span>
       </div>
 
@@ -119,7 +121,7 @@ export default function ECOTimeline({ approvalLogs = [], ecoId, createdAt, creat
                     fontSize: 10, fontWeight: 500, color: '#94A3B8', background: '#F1F5F9',
                     display: 'inline-flex', alignItems: 'center', gap: 4,
                   }}>
-                    ↓ {getDurationBetween(allEvents[idx - 1].timestamp, event.timestamp)}
+                    ↓ {getDurationBetween(allEvents[idx - 1].timestamp, event.timestamp, t)}
                   </div>
                 </div>
               )}
@@ -156,10 +158,10 @@ export default function ECOTimeline({ approvalLogs = [], ecoId, createdAt, creat
                   {/* Title + Actor */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>
-                      {event.action}
+                      {t(`eco.action_${event.action.toLowerCase().replace(/ /g, '_')}`, event.action)}
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: 12, color: '#94A3B8' }}>by</span>
+                      <span style={{ fontSize: 12, color: '#94A3B8' }}>{t('reports.by', 'by')}</span>
                       <div style={{
                         width: 20, height: 20, borderRadius: '50%', background: '#CCFBF1',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',

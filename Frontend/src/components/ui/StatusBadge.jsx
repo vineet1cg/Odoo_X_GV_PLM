@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 const statusStyles = {
   Active: 'bg-success-50 text-success-700 ring-success-500/20',
   Archived: 'bg-surface-100 text-surface-500 ring-surface-500/20',
@@ -14,12 +16,13 @@ const statusStyles = {
 };
 
 export default function StatusBadge({ status, size = 'sm' }) {
+  const { t } = useTranslation();
   const style = statusStyles[status] || 'bg-surface-100 text-surface-600 ring-surface-500/20';
   const sizeClass = size === 'lg' ? 'px-3 py-1 text-sm' : 'px-2 py-0.5 text-xs';
 
   return (
     <span className={`inline-flex items-center font-semibold rounded-full ring-1 ring-inset ${style} ${sizeClass}`}>
-      {status}
+      {t(`status.${status.toLowerCase().replace(/ /g, '_')}`, status)}
     </span>
   );
 }

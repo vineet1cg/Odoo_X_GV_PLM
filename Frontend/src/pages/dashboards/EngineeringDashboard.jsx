@@ -1,37 +1,45 @@
-import { FileText, Clock, GitBranch, Edit2, ArrowUpRight } from 'lucide-react';
+import { FileText, Clock, GitBranch, Edit2, ArrowUpRight, Plus } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { activityTimeline } from '../../data/mockData';
 import Card from '../../components/ui/Card';
 import StatusBadge from '../../components/ui/StatusBadge';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function EngineeringDashboard() {
-  const { ecoList } = useApp();
+  const { t } = useTranslation();
+  const { ecoList, canCreateEco } = useApp();
 
-  const myDrafts = ecoList.filter(e => e.stage === 'Draft').length;
-  const myPending = ecoList.filter(e => e.stage === 'Approval').length;
+  const draftEcos = ecoList.filter(e => e.stage === 'Draft');
+  const inReviewEcos = ecoList.filter(e => e.stage === 'Approval');
   const recentEditedEcos = ecoList.slice(0, 5); // Mocked recently edited
 
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-surface-800 tracking-tight">Engineering Dashboard</h1>
-        <p className="text-sm text-surface-500 mt-1">Manage your ECO drafts and track submissions</p>
+        <h1 className="text-2xl font-bold text-surface-800 tracking-tight">{t('dashboards.eng_title')}</h1>
+        <p className="text-sm text-surface-500 mt-1">{t('dashboards.eng_sub')}</p>
       </div>
 
       {/* Creator Focus Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <Card title="My Drafts" value={myDrafts} subtitle="Awaiting submission" icon={Edit2} color="primary" delay={0} />
-        <Card title="In Review" value={myPending} subtitle="Pending approval" icon={Clock} color="warning" delay={1} />
-        <Card title="Draft New ECO" value="+" subtitle="Start a new change" icon={FileText} onClickPath="/eco/create" color="primary" delay={2} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <Card title={t('dashboards.my_drafts')} value={draftEcos.length} subtitle={t('dashboards.awaiting_sub')} icon={FileText} color="surface" delay={0} />
+        <Card title={t('dashboards.in_review')} value={inReviewEcos.length} subtitle={t('dashboards.pending_app')} icon={Clock} color="primary" delay={1} />
+        {canCreateEco && (
+          <Link to="/eco/create" className="p-4 rounded-xl border-2 border-dashed border-primary-200 hover:border-primary-400 bg-primary-50 hover:bg-primary-100 transition-all flex flex-col items-center justify-center text-primary-700 min-h-[100px] h-full group">
+            <Plus size={24} className="mb-2 group-hover:scale-110 transition-transform" />
+            <span className="font-semibold">{t('dashboards.draft_new')}</span>
+            <span className="text-xs text-primary-500 mt-1">{t('dashboards.start_new')}</span>
+          </Link>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="col-span-1 lg:col-span-2 bg-surface-100 rounded-xl border border-surface-200 overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-surface-100 rounded-xl border border-surface-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-surface-100 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-surface-800">My Recent Work</h2>
-            <Link to="/eco" className="text-xs text-primary-600 hover:underline">View all drafts</Link>
+            <h2 className="text-base font-semibold text-surface-800">{t('dashboards.recent_work')}</h2>
+            <Link to="/eco" className="text-xs text-primary-600 hover:underline">{t('dashboards.view_drafts')}</Link>
           </div>
           <div className="divide-y divide-surface-100">
             {recentEditedEcos.map(eco => (

@@ -11,6 +11,7 @@ import DiffView from '../components/ui/DiffView';
 import { BarChart3, FileText, Package, Layers, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 const tabs = [
   { id: 'eco', label: 'ECO History', icon: FileText },
@@ -19,6 +20,7 @@ const tabs = [
 ];
 
 export default function Reports() {
+  const { t } = useTranslation();
   const { ecoList, products } = useApp();
   const [activeTab, setActiveTab] = useState('eco');
   const [expandedId, setExpandedId] = useState(null);
@@ -32,8 +34,8 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-surface-800 tracking-tight">Reports</h1>
-        <p className="text-sm text-surface-500 mt-1">Audit trail of all product and BoM changes</p>
+        <h1 className="text-2xl font-bold text-surface-800 tracking-tight">{t('reports.title', 'Reports')}</h1>
+        <p className="text-sm text-surface-500 mt-1">{t('reports.subtitle', 'Audit trail of all product and BoM changes')}</p>
       </div>
 
       {/* Dynamic Activity Chart */}
@@ -43,8 +45,8 @@ export default function Reports() {
         className="bg-surface-100 rounded-xl border border-surface-200 overflow-hidden hidden sm:block p-6 mb-2"
       >
         <div className="mb-6">
-          <h2 className="text-base font-bold text-surface-800 tracking-tight">ECO Distribution by Type</h2>
-          <p className="text-xs text-surface-500 mt-1 font-medium">Breakdown of change order categories across all products</p>
+          <h2 className="text-base font-bold text-surface-800 tracking-tight">{t('reports.eco_distribution', 'ECO Distribution by Type')}</h2>
+          <p className="text-xs text-surface-500 mt-1 font-medium">{t('reports.distribution_desc', 'Breakdown of change order categories across all products')}</p>
         </div>
         <div className="h-[240px] w-full">
           <ResponsiveContainer width="100%" height="100%">
@@ -83,7 +85,7 @@ export default function Reports() {
               }`}
             >
               <Icon size={16} />
-              {tab.label}
+              {t(`reports.${tab.id === 'eco' ? 'eco_history' : tab.id === 'products' ? 'product_versions' : 'bom_changes'}`, tab.label)}
             </button>
           );
         })}
@@ -120,12 +122,12 @@ export default function Reports() {
                     >
                       <div className="px-6 pb-6 pt-2">
                         <div className="flex items-center gap-4 mb-4 text-sm text-surface-500">
-                          <span>By: {eco.createdByName}</span>
-                          <span>Product: <Link to={`/products/${eco.productId}`} className="text-primary-600 hover:underline">{eco.productName}</Link></span>
-                          <span>Type: <StatusBadge status={eco.type} /></span>
+                          <span>{t('reports.by', 'By:')} {eco.createdByName}</span>
+                          <span>{t('eco.product', 'Product')}: <Link to={`/products/${eco.productId}`} className="text-primary-600 hover:underline">{eco.productName}</Link></span>
+                          <span>{t('eco.type', 'Type')}: <StatusBadge status={eco.type} /></span>
                         </div>
                         {eco.changes && <DiffView changes={eco.changes} />}
-                        <Link to={`/eco/${eco.id}`} className="inline-block mt-4 text-sm text-primary-600 hover:underline font-medium">View Full ECO →</Link>
+                        <Link to={`/eco/${eco.id}`} className="inline-block mt-4 text-sm text-primary-600 hover:underline font-medium">{t('actions.view_full_eco', 'View Full ECO →')}</Link>
                       </div>
                     </motion.div>
                   )}
@@ -151,7 +153,7 @@ export default function Reports() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-semibold text-surface-600">v{product.version}</span>
-                  <span className="text-xs text-surface-400">{product.versions.length} versions</span>
+                  <span className="text-xs text-surface-400">{product.versions.length} {t('reports.versions', 'versions')}</span>
                   {expandedId === product.id ? <ChevronUp size={16} className="text-surface-400" /> : <ChevronDown size={16} className="text-surface-400" />}
                 </div>
               </button>
@@ -168,11 +170,11 @@ export default function Reports() {
                       <table className="w-full mt-3">
                         <thead>
                           <tr>
-                            <th className="text-left text-xs font-semibold text-surface-400 uppercase pb-2">Version</th>
-                            <th className="text-left text-xs font-semibold text-surface-400 uppercase pb-2">Date</th>
-                            <th className="text-left text-xs font-semibold text-surface-400 uppercase pb-2">ECO</th>
-                            <th className="text-left text-xs font-semibold text-surface-400 uppercase pb-2">Changed By</th>
-                            <th className="text-left text-xs font-semibold text-surface-400 uppercase pb-2">Summary</th>
+                            <th className="text-left text-xs font-semibold text-surface-400 uppercase pb-2">{t('reports.version', 'Version')}</th>
+                            <th className="text-left text-xs font-semibold text-surface-400 uppercase pb-2">{t('reports.date', 'Date')}</th>
+                            <th className="text-left text-xs font-semibold text-surface-400 uppercase pb-2">{t('reports.eco', 'ECO')}</th>
+                            <th className="text-left text-xs font-semibold text-surface-400 uppercase pb-2">{t('reports.changed_by', 'Changed By')}</th>
+                            <th className="text-left text-xs font-semibold text-surface-400 uppercase pb-2">{t('reports.summary', 'Summary')}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-surface-50">
@@ -226,7 +228,7 @@ export default function Reports() {
                     >
                       <div className="px-6 pb-6 pt-2">
                         {eco.changes && <DiffView changes={eco.changes} />}
-                        <Link to={`/eco/${eco.id}`} className="inline-block mt-4 text-sm text-primary-600 hover:underline font-medium">View Full ECO →</Link>
+                        <Link to={`/eco/${eco.id}`} className="inline-block mt-4 text-sm text-primary-600 hover:underline font-medium">{t('actions.view_full_eco', 'View Full ECO →')}</Link>
                       </div>
                     </motion.div>
                   )}

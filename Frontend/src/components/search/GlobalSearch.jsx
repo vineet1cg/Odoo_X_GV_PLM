@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, X, FileText, Package, Layers, ArrowRight, Loader2 } from 'lucide-react';
 import { useDebounce } from '../../hooks/useDebounce';
 import { secureGet } from '../../capacitor/nativeServices';
+import { useTranslation } from 'react-i18next';
 
 export default function GlobalSearch({ open, setOpen }) {
   const [query, setQuery] = useState('');
@@ -12,6 +13,7 @@ export default function GlobalSearch({ open, setOpen }) {
   const inputRef = useRef();
   const navigate = useNavigate();
   const debouncedQuery = useDebounce(query, 300);
+  const { t } = useTranslation();
 
   // Cmd+K / Ctrl+K to open
   useEffect(() => {
@@ -101,9 +103,9 @@ export default function GlobalSearch({ open, setOpen }) {
   };
 
   const typeLabels = {
-    eco: 'ECO',
-    product: 'Product',
-    bom: 'Bill of Materials'
+    eco: t('eco.title_short', 'ECO'),
+    product: t('products.title_single', 'Product'),
+    bom: t('boms.title_short', 'Bill of Materials')
   };
 
   const stageBadgeColors = {
@@ -153,7 +155,7 @@ export default function GlobalSearch({ open, setOpen }) {
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
-            placeholder="Search ECOs, products, BoMs..."
+            placeholder={t('search.placeholder', 'Search ECOs, products, BoMs...')}
             className="flex-1 outline-none text-slate-900 text-base placeholder-slate-400 bg-transparent font-medium"
           />
           <div className="flex items-center gap-2">
@@ -176,16 +178,16 @@ export default function GlobalSearch({ open, setOpen }) {
               <div className="w-16 h-16 mx-auto bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
                 <Search size={24} className="text-slate-300" />
               </div>
-              <p className="text-sm font-medium text-slate-500">Search across your entire workspace</p>
-              <p className="text-xs text-slate-400 mt-1">Try searching for component names or ECO Numbers.</p>
+              <p className="text-sm font-medium text-slate-500">{t('search.empty_title', 'Search across your entire workspace')}</p>
+              <p className="text-xs text-slate-400 mt-1">{t('search.empty_subtitle', 'Try searching for component names or ECO Numbers.')}</p>
             </div>
           )}
 
           {/* No results */}
           {query.length >= 2 && !loading && results && allResults.length === 0 && (
             <div className="py-16 text-center">
-              <p className="text-sm font-medium text-slate-600">No results found for "{query}"</p>
-              <p className="text-xs text-slate-400 mt-1">Check for typos or try a different term.</p>
+              <p className="text-sm font-medium text-slate-600">{t('search.no_results', { query }, `No results found for "${query}"`)}</p>
+              <p className="text-xs text-slate-400 mt-1">{t('search.no_results_hint', 'Check for typos or try a different term.')}</p>
             </div>
           )}
 
@@ -193,7 +195,7 @@ export default function GlobalSearch({ open, setOpen }) {
           {query.length >= 2 && loading && !results && (
             <div className="py-16 text-center flex flex-col items-center justify-center">
                <Loader2 size={24} className="text-primary-400 animate-spin mb-3" />
-               <p className="text-xs font-medium text-slate-500">Searching...</p>
+               <p className="text-xs font-medium text-slate-500">{t('search.loading', 'Searching...')}</p>
             </div>
           )}
 
@@ -265,16 +267,16 @@ export default function GlobalSearch({ open, setOpen }) {
           <div className="flex items-center gap-4 text-xs font-medium text-slate-400">
             <span className="flex items-center gap-1.5">
               <kbd className="px-1.5 py-0.5 bg-white rounded border border-slate-200 shadow-sm font-mono text-[10px]">↑↓</kbd>
-              to navigate
+              {t('search.to_navigate', 'to navigate')}
             </span>
             <span className="flex items-center gap-1.5 hidden sm:flex">
               <kbd className="px-1.5 py-0.5 bg-white rounded border border-slate-200 shadow-sm font-mono text-[10px]">↵</kbd>
-              to open
+              {t('search.to_open', 'to open')}
             </span>
           </div>
           {results && (
             <span className="text-xs font-semibold text-slate-400 bg-slate-200/50 px-2 py-0.5 rounded-full">
-              {allResults.length} result{allResults.length !== 1 && 's'}
+              {allResults.length} {t('search.results_count', { count: allResults.length }, `result${allResults.length !== 1 ? 's' : ''}`)}
             </span>
           )}
         </div>

@@ -1,43 +1,22 @@
 const express = require('express');
-const router  = express.Router();
-const { getDBStatus, getPgPool } = require('../config/database');
 const authMiddleware = require('../middleware/auth');
 
-// GET /api/db/status — DB health & failover stats
-// All roles see basic status, Admin sees full stats + sync log
-router.get('/status', authMiddleware, async (req, res) => {
-  const status = getDBStatus();
+const router = express.Router();
 
-  // Non-admin: basic info only
-  if (req.user.role !== 'Admin') {
-    return res.json({
-      success: true,
-      data: {
-        current: status.current,
-        message: status.message,
-      },
-    });
-  }
-
-  // Admin: full stats + recent sync logs
+// GET /api/db/status — Check health of PostgreSQL
+router.get('/status', authMiddleware, (req, res) => {
   try {
-    const pgPool = getPgPool();
-    let recentLogs = [];
-    if (pgPool) {
-      try {
-        const { rows } = await pgPool.query(
-          `SELECT * FROM sync_log ORDER BY started_at DESC LIMIT 10`
-        );
-        recentLogs = rows;
-      } catch { /* sync_log table may not exist yet */ }
-    }
-
+    const status = req.dbStatus();
     res.json({
       success: true,
-      data: { ...status, recentLogs },
+      data: {
+        healthy: status.postgres.healthy,
+        message: status.message,
+        timestamp: new Date()
+      }
     });
-  } catch {
-    res.json({ success: true, data: status });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to retrieve database status' });
   }
 });
 

@@ -1,71 +1,46 @@
 const express = require('express');
-const Setting = require('../models/Setting');
 const authMiddleware = require('../middleware/auth');
 const roleMiddleware = require('../middleware/roles');
 
 const router = express.Router();
 
-// GET /api/settings/eco-stages — Get ECO stage configuration
-router.get('/eco-stages', authMiddleware, async (req, res) => {
+// GET /api/settings/:key — Get a setting
+router.get('/:key', authMiddleware, async (req, res) => {
   try {
-    const setting = await Setting.findOne({ key: 'eco_stages' });
+    const result = await req.db('SELECT value FROM settings WHERE key = $1', [req.params.key]);
+    const value = result.rows[0]?.value;
+
+    // Default values if not found
+    let defaultValue = null;
+    if (req.params.key === 'eco_stages') defaultValue = ['New', 'In Review', 'Approval', 'Done'];
+    if (req.params.key === 'approval_rules') defaultValue = [];
+
     res.json({
       success: true,
-      data: setting ? setting.value : ['New', 'In Review', 'Approval', 'Done']
+      data: value !== undefined ? value : defaultValue
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to fetch ECO stages' });
+    res.status(500).json({ success: false, message: 'Failed to fetch settings' });
   }
 });
 
-// PUT /api/settings/eco-stages — Update ECO stages (Admin only)
-router.put('/eco-stages', authMiddleware, roleMiddleware(['Admin']), async (req, res) => {
+// PUT /api/settings/:key — Update a setting (Admin only)
+router.put('/:key', authMiddleware, roleMiddleware(['Admin']), async (req, res) => {
   try {
-    const { stages } = req.body;
-    if (!Array.isArray(stages)) {
-      return res.status(400).json({ success: false, message: 'stages must be an array' });
-    }
+    const { value } = req.body;
 
-    const setting = await Setting.findOneAndUpdate(
-      { key: 'eco_stages' },
-      { value: stages },
-      { upsert: true, new: true }
+    const result = await req.db(
+      `INSERT INTO settings (key, value, updated_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = NOW()
+       RETURNING value`,
+      [req.params.key, JSON.stringify(value)]
     );
-    res.json({ success: true, data: setting.value });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to update ECO stages' });
-  }
-});
 
-// GET /api/settings/rules — Get approval toggle rules
-router.get('/rules', authMiddleware, async (req, res) => {
-  try {
-    const setting = await Setting.findOne({ key: 'approval_rules' });
-    res.json({
-      success: true,
-      data: setting ? setting.value : []
-    });
+    res.json({ success: true, data: result.rows[0].value });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to fetch approval rules settings' });
-  }
-});
-
-// PUT /api/settings/rules — Update approval toggle rules (Admin only)
-router.put('/rules', authMiddleware, roleMiddleware(['Admin']), async (req, res) => {
-  try {
-    const { rules } = req.body;
-    if (!Array.isArray(rules)) {
-      return res.status(400).json({ success: false, message: 'rules must be an array' });
-    }
-
-    const setting = await Setting.findOneAndUpdate(
-      { key: 'approval_rules' },
-      { value: rules },
-      { upsert: true, new: true }
-    );
-    res.json({ success: true, data: setting.value });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to update approval rules settings' });
+    console.error('[SETTINGS UPDATE PROB]', error);
+    res.status(500).json({ success: false, message: 'Failed to update settings' });
   }
 });
 

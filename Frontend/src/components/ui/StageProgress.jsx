@@ -1,7 +1,9 @@
 import { Check } from 'lucide-react';
 import { ECO_STAGES } from '../../data/mockData';
+import { useTranslation } from 'react-i18next';
 
 export default function StageProgress({ currentStage }) {
+  const { t } = useTranslation();
   const currentIdx = ECO_STAGES.indexOf(currentStage);
 
   return (
@@ -35,7 +37,7 @@ export default function StageProgress({ currentStage }) {
                   isComplete ? 'text-success-600' : isCurrent ? 'text-primary-600' : 'text-surface-400'
                 }`}
               >
-                {stage}
+                {t(`status.${stage.toLowerCase().replace(/ /g, '_')}`, stage)}
               </span>
             </div>
 

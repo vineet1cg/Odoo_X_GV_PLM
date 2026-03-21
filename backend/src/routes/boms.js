@@ -1,5 +1,4 @@
 const express = require('express');
-const BOM = require('../models/BOM');
 const authMiddleware = require('../middleware/auth');
 const roleMiddleware = require('../middleware/roles');
 
@@ -10,30 +9,36 @@ router.get('/', authMiddleware, async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
-    const skip = (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
-    const query = {};
+    let sql = 'SELECT * FROM boms WHERE 1=1';
+    const params = [];
+
     if (req.query.search) {
-      query.$or = [
-        { name: { $regex: String(req.query.search), $options: 'i' } },
-        { productName: { $regex: String(req.query.search), $options: 'i' } }
-      ];
+      sql += ` AND (name ILIKE $${params.length + 1} OR product_name ILIKE $${params.length + 1})`;
+      params.push(`%${req.query.search}%`);
     }
 
-    const total = await BOM.countDocuments(query);
-    const boms = await BOM.find(query)
-      .sort({ version: -1 })
-      .skip(skip)
-      .limit(limit);
+    // Total count
+    const countSql = `SELECT COUNT(*) FROM (${sql}) AS sub`;
+    const countRes = await req.db(countSql, params);
+    const total = parseInt(countRes.rows[0].count, 10);
+
+    // Paginated result
+    sql += ` ORDER BY version DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    params.push(limit, offset);
+
+    const result = await req.db(sql, params);
 
     res.json({ 
       success: true, 
-      data: boms,
+      data: result.rows,
       total,
       page,
       totalPages: Math.ceil(total / limit) || 1
     });
   } catch (error) {
+    console.error('[BOMS PROB]', error);
     res.status(500).json({ success: false, message: 'Failed to fetch BOMs' });
   }
 });
@@ -41,7 +46,13 @@ router.get('/', authMiddleware, async (req, res) => {
 // GET /api/boms/:id — Get single BOM  
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
-    const bom = await BOM.findOne({ _id: req.params.id });
+    const result = await req.db(
+      'SELECT * FROM boms WHERE id = $1',
+      [req.params.id]
+    );
+
+    const bom = result.rows[0];
+
     if (!bom) {
       return res.status(404).json({ success: false, message: 'BOM not found' });
     }
@@ -55,30 +66,31 @@ router.get('/:id', authMiddleware, async (req, res) => {
 router.post('/', authMiddleware, roleMiddleware(['Admin', 'Engineering User']), async (req, res) => {
   try {
     const { name, productId, productName, components, operations } = req.body;
-    const newBom = await BOM.create({
-      id: `bom${Date.now()}`,
-      name,
-      productId,
-      productName: productName || '',
-      version: '1.0',
-      status: 'Draft',
-      components: (components || []).map((c, i) => ({
-        id: c.id || `comp-${Date.now()}-${i}`,
-        name: c.name,
-        partNumber: c.partNumber || '',
-        quantity: c.quantity || 1,
-        unit: c.unit || 'pcs',
-        cost: c.cost || 0
-      })),
-      operations: (operations || []).map((op, i) => ({
-        id: op.id || `op-${Date.now()}-${i}`,
-        name: op.name,
-        workCenter: op.workCenter || '',
-        duration: op.duration || ''
-      }))
-    });
-    res.status(201).json({ success: true, data: newBom });
+    
+    const id = `bom${Date.now()}`;
+    const version = '1.0';
+    const status = 'Draft';
+
+    // Insert into boms table
+    // Assuming components and operations are JSONB columns in Postgres
+    const result = await req.db(
+      `INSERT INTO boms (id, name, product_id, product_name, version, status, components, operations)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [
+        id, 
+        name, 
+        productId, 
+        productName || '', 
+        version, 
+        status, 
+        JSON.stringify(components || []), 
+        JSON.stringify(operations || [])
+      ]
+    );
+
+    res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error) {
+    console.error('[BOMS CREATE PROB]', error);
     res.status(500).json({ success: false, message: 'Failed to create BOM' });
   }
 });

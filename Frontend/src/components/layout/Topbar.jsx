@@ -9,6 +9,8 @@ import { useApp } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import GlobalSearch from '../search/GlobalSearch';
 import DBStatusBadge from '../admin/DBStatusBadge';
+import LanguageToggle from './LanguageToggle';
+import { useTranslation } from 'react-i18next';
 
 export default function Topbar({ setMobileMenuOpen }) {
   const { currentUser, logout, notificationList, markNotificationRead } = useApp();
@@ -16,6 +18,7 @@ export default function Topbar({ setMobileMenuOpen }) {
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const notifRef = useRef(null);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const unreadCount = notificationList.filter(n => !n.read).length;
 
@@ -57,7 +60,7 @@ export default function Topbar({ setMobileMenuOpen }) {
             onClick={() => setShowGlobalSearch(true)}
             className="w-full text-left pl-10 pr-4 py-2 rounded-lg border border-surface-200 bg-surface-50 text-sm text-surface-400 focus:outline-none hover:border-primary-300 hover:bg-white transition-all flex justify-between items-center"
           >
-            <span className="truncate">Search ECOs, Products, BoMs...</span>
+            <span className="truncate">{t('eco.search')}</span>
             <kbd className="hidden sm:inline-block text-[10px] font-mono bg-white border border-slate-200 rounded px-1.5 py-0.5 shadow-sm text-slate-400">⌘K</kbd>
           </button>
         </div>
@@ -73,6 +76,8 @@ export default function Topbar({ setMobileMenuOpen }) {
         >
           <Search size={20} />
         </button>
+
+        <LanguageToggle />
 
         {/* DB Status Badge */}
         <DBStatusBadge />
@@ -94,12 +99,12 @@ export default function Topbar({ setMobileMenuOpen }) {
           {showNotif && (
             <div className="absolute right-0 top-12 w-80 bg-surface-100 rounded-xl shadow-xl border border-surface-200 overflow-hidden animate-fade-in">
               <div className="px-4 py-3 border-b border-surface-100 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-surface-800">Notifications</h3>
-                {unreadCount > 0 && <span className="text-xs text-primary-600 font-medium">{unreadCount} new</span>}
+                <h3 className="text-sm font-semibold text-surface-800">{t('nav.notifications', 'Notifications')}</h3>
+                {unreadCount > 0 && <span className="text-xs text-primary-600 font-medium">{unreadCount} {t('common.new', 'new')}</span>}
               </div>
               <div className="max-h-72 overflow-y-auto">
                 {notificationList.length === 0 && (
-                  <p className="px-4 py-6 text-sm text-surface-400 text-center">No notifications yet</p>
+                  <p className="px-4 py-6 text-sm text-surface-400 text-center">{t('nav.no_notifications', 'No notifications yet')}</p>
                 )}
                 {notificationList.map(n => (
                   <button
@@ -133,13 +138,13 @@ export default function Topbar({ setMobileMenuOpen }) {
           <div className="text-left hidden sm:block">
             <p className="text-sm font-medium text-surface-800 leading-tight">{currentUser.name}</p>
             <span className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded-full mt-0.5 ${roleColors[currentUser.role]}`}>
-              {currentUser.role}
+              {t(`roles.${currentUser.role}`, currentUser.role)}
             </span>
           </div>
           <button
             onClick={handleLogout}
             className="p-2 rounded-lg text-surface-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-            title="Logout"
+            title={t('nav.sign_out')}
           >
             <LogOut size={18} />
           </button>

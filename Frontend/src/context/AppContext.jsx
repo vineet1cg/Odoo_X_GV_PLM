@@ -7,6 +7,7 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { users, products as initialProducts, boms as initialBoms, ecos as initialEcos, notifications as initialNotifications, ROLES } from '../data/mockData';
 import { secureSet, secureGet, secureRemove } from '../capacitor/nativeServices';
+import i18n from '../i18n/index';
 
 const AppContext = createContext(null);
 
@@ -84,6 +85,21 @@ export function AppProvider({ children }) {
         });
         setIsAuthenticated(true);
         fetchAllData(data.data.token);
+        
+        // Fetch language preset
+        fetch('http://localhost:5000/api/preferences', {
+          headers: { 'Authorization': `Bearer ${data.data.token}` }
+        })
+        .then(r => r.json())
+        .then(prefData => {
+          if (prefData.success && prefData.data.language) {
+            const savedLang = prefData.data.language;
+            i18n.changeLanguage(savedLang);
+            localStorage.setItem('plm_language', savedLang);
+          }
+        })
+        .catch(console.error);
+
         return { success: true };
       } else {
         return { error: data.message || 'Invalid credentials' };
@@ -125,6 +141,20 @@ export function AppProvider({ children }) {
           });
           setIsAuthenticated(true);
           fetchAllData(token);
+
+          // Fetch language preset
+          fetch('http://localhost:5000/api/preferences', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+          .then(r => r.json())
+          .then(prefData => {
+            if (prefData.success && prefData.data.language) {
+              const savedLang = prefData.data.language;
+              i18n.changeLanguage(savedLang);
+              localStorage.setItem('plm_language', savedLang);
+            }
+          })
+          .catch(console.error);
         } else {
           await secureRemove('token');
         }

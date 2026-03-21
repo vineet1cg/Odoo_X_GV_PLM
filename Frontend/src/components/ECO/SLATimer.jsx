@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function SLATimer({ 
   enteredAt,
@@ -10,13 +11,14 @@ export default function SLATimer({
   escalateThreshold,
   compact = true 
 }) {
+  const { t } = useTranslation();
   const [timeHuman, setTimeHuman] = useState('...');
   const [currentPercentage, setCurrentPercentage] = useState(percentageUsed);
   const [currentStatus, setCurrentStatus] = useState(slaStatus);
 
   useEffect(() => {
     if (!enteredAt || stage === 'Done' || stage === 'Rejected') {
-      setTimeHuman('Completed');
+      setTimeHuman(t('status.completed', 'Completed'));
       return;
     }
 
@@ -58,7 +60,7 @@ export default function SLATimer({
     if (compact) return null;
     return (
       <div className="bg-surface-100 rounded-lg p-4 border border-surface-200">
-        <p className="text-sm font-medium text-surface-500">SLA: Completed</p>
+        <p className="text-sm font-medium text-surface-500">SLA: {t('status.completed', 'Completed')}</p>
       </div>
     );
   }
@@ -93,7 +95,7 @@ export default function SLATimer({
         <div>
           <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
             <Clock size={16} className="text-slate-400" />
-            Time in {stage} stage
+            {t('eco.time_in_stage', { stage: t(`status.${stage.toLowerCase().replace(/ /g, '_')}`, stage) }, `Time in ${stage} stage`)}
           </h3>
           <div className="text-2xl font-black text-slate-900 mt-1 tracking-tight">
             {timeHuman}
@@ -102,7 +104,7 @@ export default function SLATimer({
         <div className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${badgeColors[currentStatus]} border`}>
           {currentStatus === 'CRITICAL' && <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />}
           {currentStatus === 'WARNING' && <AlertTriangle size={14} />}
-          SLA {currentStatus}
+          SLA {t(`status.${currentStatus.toLowerCase()}`, currentStatus)}
         </div>
       </div>
 
@@ -125,7 +127,7 @@ export default function SLATimer({
               style={{ left: `${(warnThreshold / escalateThreshold) * 100}%` }}
             >
               <span className="absolute top-5 -ml-8 text-[10px] font-medium text-amber-600 w-16 text-center">
-                Warn at {warnThreshold / 3600000}h
+                {t('eco.warn_at', { h: warnThreshold / 3600000 }, `Warn at ${warnThreshold / 3600000}h`)}
               </span>
             </div>
             
@@ -135,7 +137,7 @@ export default function SLATimer({
               style={{ left: `100%` }}
             >
               <span className="absolute top-5 -ml-8 text-[10px] font-medium text-red-600 w-16 text-center">
-                Escalate at {escalateThreshold / 3600000}h
+                {t('eco.escalate_at', { h: escalateThreshold / 3600000 }, `Escalate at ${escalateThreshold / 3600000}h`)}
               </span>
             </div>
           </div>

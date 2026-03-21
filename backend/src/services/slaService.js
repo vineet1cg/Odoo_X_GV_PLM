@@ -1,4 +1,4 @@
-const ECO = require('../models/ECO');
+const { query } = require('../config/database');
 
 const SLA_THRESHOLDS = {
   'New':       { escalate: 48 * 3600000 },
@@ -10,23 +10,25 @@ let slaInterval = null;
 
 async function checkSLA() {
   try {
-    const ecos = await ECO.find({
-      stage: { $nin: ['Done', 'Rejected'] },
-      slaEscalated: false
-    });
+    // Fetch non-escalated ECOs in active stages
+    const res = await query(
+      "SELECT id, eco_number, stage, stage_entered_at FROM ecos WHERE stage NOT IN ('Done', 'Rejected') AND sla_escalated = false"
+    );
 
+    const ecos = res.rows;
     const now = Date.now();
-    for (const eco of ecos) {
-      if (!eco.stageEnteredAt) continue;
 
-      const timeInStage = now - new Date(eco.stageEnteredAt).getTime();
+    for (const eco of ecos) {
+      if (!eco.stage_entered_at) continue;
+
+      const timeInStage = now - new Date(eco.stage_entered_at).getTime();
       const threshold = SLA_THRESHOLDS[eco.stage];
 
       if (threshold && timeInStage >= threshold.escalate) {
-        console.log(`[SLA ESCALATION] 🚨 SLA Breach — ECO ${eco.ecoNumber} has been in ${eco.stage} stage for too long!`);
-        // In a real application, trigger an email service here.
-        eco.slaEscalated = true;
-        await eco.save();
+        console.log(`[SLA ESCALATION] 🚨 SLA Breach — ECO ${eco.eco_number} has been in ${eco.stage} stage for too long!`);
+        
+        // Mark as escalated in DB
+        await query('UPDATE ecos SET sla_escalated = true WHERE id = $1', [eco.id]);
       }
     }
   } catch (err) {
@@ -37,9 +39,11 @@ async function checkSLA() {
 function startSLAMonitor() {
   if (slaInterval) clearInterval(slaInterval);
   console.log('[SLA Monitor] Started (checking every 15 minutes)');
-  // check every 15 minutes (900000 ms)
+  
+  // check every 15 minutes
   slaInterval = setInterval(checkSLA, 900000);
-  // initial check
+  
+  // initial check after 5s
   setTimeout(checkSLA, 5000);
 }
 

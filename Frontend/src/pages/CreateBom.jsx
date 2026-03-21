@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { ArrowLeft, Save, Plus, X, Wrench, Cog } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function CreateBom() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { products, addBom } = useApp();
   
@@ -65,8 +67,8 @@ export default function CreateBom() {
           <ArrowLeft size={20} />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-surface-800 tracking-tight">Create New BoM</h1>
-          <p className="text-sm text-surface-500 mt-1">Define an initial Bill of Materials structure and routing</p>
+          <h1 className="text-2xl font-bold text-surface-800 tracking-tight">{t('boms.create_new', 'Create New BoM')}</h1>
+          <p className="text-sm text-surface-500 mt-1">{t('boms.create_desc', 'Define an initial Bill of Materials structure and routing')}</p>
         </div>
       </div>
 
@@ -78,23 +80,23 @@ export default function CreateBom() {
       >
         {/* General Information */}
         <div className="bg-surface-100 border border-surface-200 rounded-xl p-6 shadow-sm">
-          <h2 className="text-sm font-semibold text-surface-800 uppercase tracking-wider mb-4 border-b border-surface-200 pb-2">General Information</h2>
+          <h2 className="text-sm font-semibold text-surface-800 uppercase tracking-wider mb-4 border-b border-surface-200 pb-2">{t('products.general_info', 'General Information')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-surface-600 uppercase">BoM Name *</label>
+              <label className="text-xs font-semibold text-surface-600 uppercase">{t('boms.bom_name', 'BoM Name *')}</label>
               <input
-                required type="text" placeholder="e.g. Master Assembly v1"
+                required type="text" placeholder={t('boms.bom_name_ph', 'e.g. Master Assembly v1')}
                 className="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:outline-none focus:border-primary-400 focus:ring-1 focus:ring-primary-400"
                 value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-surface-600 uppercase">Target Product *</label>
+              <label className="text-xs font-semibold text-surface-600 uppercase">{t('create_eco.target_product', 'Target Product *')}</label>
               <select
                 required className="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:outline-none focus:border-primary-400 focus:ring-1 focus:ring-primary-400"
                 value={formData.productId} onChange={e => setFormData({ ...formData, productId: e.target.value })}
               >
-                <option value="">Select a Product...</option>
+                <option value="">{t('create_eco.select_product', 'Select a Product...')}</option>
                 {products.map(p => (
                   <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>
                 ))}
@@ -102,9 +104,9 @@ export default function CreateBom() {
             </div>
           </div>
           <div className="space-y-1.5 mt-4">
-            <label className="text-xs font-semibold text-surface-600 uppercase">Description</label>
+            <label className="text-xs font-semibold text-surface-600 uppercase">{t('create_eco.reason', 'Description')}</label>
             <textarea
-              rows={2} placeholder="BoM purpose or assembly instructions..."
+              rows={2} placeholder={t('boms.desc_ph', 'BoM purpose or assembly instructions...')}
               className="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:outline-none focus:border-primary-400 focus:ring-1 focus:ring-primary-400"
               value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })}
             />
@@ -116,20 +118,20 @@ export default function CreateBom() {
           <div className="flex justify-between items-end mb-4 border-b border-surface-200 pb-2">
             <div className="flex items-center gap-2">
               <Wrench size={16} className="text-surface-400" />
-              <h2 className="text-sm font-semibold text-surface-800 uppercase tracking-wider">Components List</h2>
+              <h2 className="text-sm font-semibold text-surface-800 uppercase tracking-wider">{t('boms.components_list', 'Components List')}</h2>
             </div>
             <button type="button" onClick={addComponentRow} className="text-xs font-medium text-primary-600 hover:text-primary-700 bg-primary-50 px-3 py-1.5 rounded-md flex items-center gap-1">
-               <Plus size={14} /> Add Part
+               <Plus size={14} /> {t('actions.add_part', 'Add Part')}
             </button>
           </div>
           
           <div className="space-y-2 overflow-x-auto min-w-[700px]">
             <div className="grid grid-cols-[1.5fr_2fr_80px_80px_100px_auto] gap-3 px-2 mb-2 text-xs font-semibold text-surface-500 uppercase">
-              <div>Part Number</div>
-              <div>Component Name</div>
-              <div>Qty</div>
-              <div>Unit</div>
-              <div>Cost ($)</div>
+              <div>{t('boms.part_number', 'Part Number')}</div>
+              <div>{t('boms.comp_name', 'Component Name')}</div>
+              <div>{t('boms.qty', 'Qty')}</div>
+              <div>{t('boms.unit', 'Unit')}</div>
+              <div>{t('boms.cost_usd', 'Cost ($)')}</div>
               <div className="w-8"></div>
             </div>
             {components.map((comp, idx) => (
@@ -154,18 +156,18 @@ export default function CreateBom() {
           <div className="flex justify-between items-end mb-4 border-b border-surface-200 pb-2">
             <div className="flex items-center gap-2">
               <Cog size={16} className="text-surface-400" />
-              <h2 className="text-sm font-semibold text-surface-800 uppercase tracking-wider">Manufacturing Operations</h2>
+              <h2 className="text-sm font-semibold text-surface-800 uppercase tracking-wider">{t('boms.mfg_operations', 'Manufacturing Operations')}</h2>
             </div>
             <button type="button" onClick={addOperationRow} className="text-xs font-medium text-primary-600 hover:text-primary-700 bg-primary-50 px-3 py-1.5 rounded-md flex items-center gap-1">
-               <Plus size={14} /> Add Operation
+               <Plus size={14} /> {t('actions.add_operation', 'Add Operation')}
             </button>
           </div>
           
           <div className="space-y-2 overflow-x-auto min-w-[600px]">
             <div className="grid grid-cols-[2fr_1.5fr_1fr_auto] gap-3 px-2 mb-2 text-xs font-semibold text-surface-500 uppercase">
-              <div>Operation Name</div>
-              <div>Work Center</div>
-              <div>Duration</div>
+              <div>{t('boms.op_name', 'Operation Name')}</div>
+              <div>{t('boms.work_center', 'Work Center')}</div>
+              <div>{t('boms.duration', 'Duration')}</div>
               <div className="w-8"></div>
             </div>
             {operations.map((op, idx) => (
@@ -183,7 +185,7 @@ export default function CreateBom() {
 
         <div className="flex justify-end pt-4">
           <button type="submit" className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition shadow-sm">
-            <Save size={18} /> Save BoM
+            <Save size={18} /> {t('actions.save_bom', 'Save BoM')}
           </button>
         </div>
       </motion.form>

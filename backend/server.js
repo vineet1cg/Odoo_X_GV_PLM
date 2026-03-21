@@ -5,7 +5,8 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // ── DB Layer ──────────────────────────────────────
-const { initDatabases, stopHealthMonitor } = require('./src/config/database');
+// ── DB Layer ──────────────────────────────────────
+const { initDatabases } = require('./src/config/database');
 const dbMiddleware = require('./src/middleware/dbMiddleware');
 
 // ── Route imports ─────────────────────────────────
@@ -24,6 +25,8 @@ const slaRouter = require('./src/routes/sla');
 const exportRouter = require('./src/routes/export');
 const searchRouter = require('./src/routes/search');
 const dbStatusRoute = require('./src/routes/dbStatus');
+const generateRoute = require('./src/routes/generate');
+const riskRoute = require('./src/routes/risk');
 const { startSLAMonitor } = require('./src/services/slaService');
 
 const app = express();
@@ -46,6 +49,8 @@ app.use((req, res, next) => {
 });
 
 // ── Routes ────────────────────────────────────────
+const publicRoute = require('./src/routes/public');
+app.use('/api/public', publicRoute);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/boms', bomRoutes);
@@ -56,11 +61,14 @@ app.use('/api/ecos', exportRouter);
 app.use('/api', searchRouter);
 app.use('/api/db', dbStatusRoute);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/preferences', require('./src/routes/preferences'));
 app.use('/api/users', userRoutes);
 app.use('/api/approval-rules', approvalRuleRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/generate', generateRoute);
+app.use('/api/ecos', riskRoute);
 
 app.get('/api/health', (req, res) => {
   res.json({ success: true, data: { status: 'OK', timestamp: new Date() } });
@@ -80,8 +88,8 @@ app.use((err, req, res, next) => {
 });
 
 // ── Graceful shutdown ─────────────────────────────
-process.on('SIGTERM', () => { stopHealthMonitor(); process.exit(0); });
-process.on('SIGINT',  () => { stopHealthMonitor(); process.exit(0); });
+process.on('SIGTERM', () => { process.exit(0); });
+process.on('SIGINT', () => { process.exit(0); });
 
 module.exports = app;
 
@@ -91,6 +99,7 @@ if (require.main === module) {
   const startServer = async () => {
     try {
       await initDatabases();
+      startSLAMonitor();
       app.listen(PORT, () => {
         console.log(`\n[SERVER] PLM Flow running on http://localhost:${PORT}`);
         console.log(`[SERVER] CORS enabled for localhost:5173/5174`);

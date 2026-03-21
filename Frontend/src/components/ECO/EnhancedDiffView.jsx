@@ -33,8 +33,8 @@ export default function EnhancedDiffView({ eco, oldBom, newBom, type }) {
         border: '1px solid #E2E8F0', fontFamily: 'Inter, system-ui, sans-serif',
       }}>
         <Edit3 size={36} style={{ color: '#CBD5E1', margin: '0 auto 12px' }} />
-        <p style={{ fontSize: 14, fontWeight: 600, color: '#64748B' }}>No changes recorded</p>
-        <p style={{ fontSize: 13, color: '#94A3B8', marginTop: 4 }}>This ECO has no tracked changes yet.</p>
+        <p style={{ fontSize: 14, fontWeight: 600, color: '#64748B' }}>{t('eco.no_changes', 'No changes recorded')}</p>
+        <p style={{ fontSize: 13, color: '#94A3B8', marginTop: 4 }}>{t('eco.no_changes_desc', 'This ECO has no tracked changes yet.')}</p>
       </div>
     );
   }
@@ -56,7 +56,7 @@ export default function EnhancedDiffView({ eco, oldBom, newBom, type }) {
                 padding: '3px 10px', borderRadius: 9999, fontSize: 11, fontWeight: 600,
                 background: '#FFF7ED', color: '#C2410C', border: '1px solid #FDE68A',
               }}>
-                {changeCounts.modified} Modified
+                {changeCounts.modified} {t('eco.modified', 'Modified')}
               </span>
             )}
             {changeCounts.added > 0 && (
@@ -64,7 +64,7 @@ export default function EnhancedDiffView({ eco, oldBom, newBom, type }) {
                 padding: '3px 10px', borderRadius: 9999, fontSize: 11, fontWeight: 600,
                 background: '#F0FDF4', color: '#166534', border: '1px solid #A7F3D0',
               }}>
-                {changeCounts.added} Added
+                {changeCounts.added} {t('eco.added', 'Added')}
               </span>
             )}
             {changeCounts.removed > 0 && (
@@ -72,7 +72,7 @@ export default function EnhancedDiffView({ eco, oldBom, newBom, type }) {
                 padding: '3px 10px', borderRadius: 9999, fontSize: 11, fontWeight: 600,
                 background: '#FFF1F2', color: '#9F1239', border: '1px solid #FECACA',
               }}>
-                {changeCounts.removed} Removed
+                {changeCounts.removed} {t('eco.removed', 'Removed')}
               </span>
             )}
           </div>
@@ -87,7 +87,7 @@ export default function EnhancedDiffView({ eco, oldBom, newBom, type }) {
           }}
         >
           {showUnchanged ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          {showUnchanged ? 'Collapse' : 'Expand All'}
+          {showUnchanged ? t('actions.collapse', 'Collapse') : t('actions.expand_all', 'Expand All')}
         </button>
       </div>
 
@@ -100,7 +100,7 @@ export default function EnhancedDiffView({ eco, oldBom, newBom, type }) {
           padding: '8px 14px', borderRadius: 6, background: '#F1F5F9',
           fontSize: 12, fontWeight: 600, color: '#475569', textAlign: 'center',
         }}>
-          Before {eco?.versionUpdate && eco?.newVersion ? `(Current)` : ''}
+          {t('eco.before', 'Before')} {eco?.versionUpdate && eco?.newVersion ? `(${t('eco.current', 'Current')})` : ''}
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <ArrowRight size={14} style={{ color: '#94A3B8' }} />
@@ -109,7 +109,7 @@ export default function EnhancedDiffView({ eco, oldBom, newBom, type }) {
           padding: '8px 14px', borderRadius: 6, background: '#CCFBF1',
           fontSize: 12, fontWeight: 600, color: '#0D9488', textAlign: 'center',
         }}>
-          After {eco?.newVersion ? `(v${eco.newVersion})` : ''}
+          {t('eco.after', 'After')} {eco?.newVersion ? `(v${eco.newVersion})` : ''}
         </div>
       </div>
 
@@ -203,11 +203,11 @@ export default function EnhancedDiffView({ eco, oldBom, newBom, type }) {
           }}
         >
           <span style={{ fontSize: 13, color: '#92400E', fontWeight: 500 }}>
-            Total cost impact:
+            {t('eco.total_cost_impact', 'Total cost impact:')}
           </span>
           <span style={{ fontSize: 14, fontWeight: 700, color: costImpact.amount >= 0 ? '#DC2626' : '#059669' }}>
             {costImpact.amount >= 0 ? '+' : ''}₹{Math.abs(costImpact.amount).toLocaleString()}
-            {' '}per unit ({costImpact.percent >= 0 ? '+' : ''}{costImpact.percent}%)
+            {' '}{t('eco.per_unit', 'per unit')} ({costImpact.amount >= 0 ? '+' : ''}{costImpact.percent}%)
           </span>
         </motion.div>
       )}
@@ -223,7 +223,7 @@ export default function EnhancedDiffView({ eco, oldBom, newBom, type }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <ImageIcon size={15} style={{ color: '#64748B' }} />
             <h4 style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Image Changes
+              {t('eco.image_changes', 'Image Changes')}
             </h4>
             <span style={{ fontSize: 11, color: '#94A3B8', fontWeight: 500 }}>
               ({imageChanges.length})
@@ -260,7 +260,7 @@ export default function EnhancedDiffView({ eco, oldBom, newBom, type }) {
                             onError={e => { e.target.style.display = 'none'; }}
                           />
                         </div>
-                        <p style={{ fontSize: 10, color: '#9F1239', marginTop: 4, fontWeight: 500 }}>Before</p>
+                        <p style={{ fontSize: 10, color: '#9F1239', marginTop: 4, fontWeight: 500 }}>{t('eco.before', 'Before')}</p>
                       </div>
                     )}
                     {ic.newImage && (
@@ -273,7 +273,7 @@ export default function EnhancedDiffView({ eco, oldBom, newBom, type }) {
                             onError={e => { e.target.style.display = 'none'; }}
                           />
                         </div>
-                        <p style={{ fontSize: 10, color: '#166534', marginTop: 4, fontWeight: 500 }}>After</p>
+                        <p style={{ fontSize: 10, color: '#166534', marginTop: 4, fontWeight: 500 }}>{t('eco.after', 'After')}</p>
                       </div>
                     )}
                   </div>

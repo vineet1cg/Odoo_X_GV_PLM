@@ -1,7 +1,4 @@
 const express = require('express');
-const ECO = require('../models/ECO');
-const Product = require('../models/Product');
-const BOM = require('../models/BOM');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
@@ -14,68 +11,66 @@ router.get('/search', authMiddleware, async (req, res) => {
       return res.json({ success: true, data: { results: { ecos: [], products: [], boms: [] }, totalCount: 0, query: q } });
     }
 
-    const regex = new RegExp(q, 'i');
+    const searchPattern = `%${q}%`;
     const userRole = req.user.role;
 
-    const [ecos, products, boms] = await Promise.all([
+    const [ecosRes, productsRes, bomsRes] = await Promise.all([
       // Search ECOs
-      ECO.find({
-        $or: [
-          { title: regex },
-          { ecoNumber: regex },
-          { description: regex }
-        ]
-      })
-      .select('id _id title ecoNumber stage type productId createdAt')
-      .limit(5)
-      .sort({ createdAt: -1 })
-      .lean(),
-      
+      req.db(
+        `SELECT id, title, eco_number, stage, type, product_id, created_at FROM ecos 
+         WHERE title ILIKE $1 OR eco_number ILIKE $1 OR description ILIKE $1 LIMIT 5`,
+        [searchPattern]
+      ),
+
       // Search Products (Operations only see Active)
-      Product.find({
-        $or: [{ name: regex }, { sku: regex }],
-        ...(userRole === 'Operations User' ? { status: 'Active' } : {})
-      })
-      .select('id _id name sku version status category')
-      .limit(5)
-      .lean(),
-      
+      req.db(
+        `SELECT id, name, sku, version, status, category FROM products 
+         WHERE (name ILIKE $1 OR sku ILIKE $1) 
+         ${userRole === 'Operations User' ? "AND status = 'Active'" : ""} 
+         LIMIT 5`,
+        [searchPattern]
+      ),
+
       // Search BOMs
-      BOM.find({
-        $or: [{ name: regex }]
-      })
-      .select('id _id name version status productId')
-      .limit(5)
-      .lean()
+      req.db(
+        `SELECT id, name, version, status, product_id FROM boms 
+         WHERE name ILIKE $1 
+         LIMIT 5`,
+        [searchPattern]
+      )
     ]);
+
+    const ecos = ecosRes.rows;
+    const products = productsRes.rows;
+    const boms = bomsRes.rows;
 
     res.json({
       success: true,
       data: {
         results: {
           ecos: ecos.map(e => ({
-            id: e.id || e._id,
+            id: e.id,
             type: 'eco',
             title: e.title,
-            subtitle: `${e.ecoNumber || ''} · ${e.stage || ''}`,
+            subtitle: `${e.eco_number || ''} · ${e.stage || ''}`,
             badge: e.stage,
-            url: `/eco/${e.id || e._id}`
+            url: `/eco/${e.id}`
           })),
           products: products.map(p => ({
-            id: p.id || p._id,
+            id: p.id,
             type: 'product',
             title: p.name,
             subtitle: `${p.sku || ''} · ${p.status || ''} · v${p.version || ''}`,
             badge: p.status,
-            url: `/products/${p.id || p._id}`
+            url: `/products/${p.id}`
           })),
           boms: boms.map(b => ({
-            id: b.id || b._id,
+            id: b.id,
             type: 'bom',
             title: b.name,
             subtitle: `v${b.version || ''}`,
             badge: b.status || b.version,
-            url: `/boms/${b.id || b._id}`
+            url: `/boms/${b.id}`
           }))
         },
         totalCount: ecos.length + products.length + boms.length,

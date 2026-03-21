@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Eye, CheckCircle, XCircle, MessageSquare, ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const borderColors = {
   added: 'ring-success-400 border-success-300',
@@ -24,6 +25,7 @@ const labelText = {
 };
 
 export default function ImageDiffView({ imageChanges = [], canReview = false, onReviewImage, onPreviewImage }) {
+  const { t } = useTranslation();
   const [commentingId, setCommentingId] = useState(null);
   const [comment, setComment] = useState('');
 
@@ -39,7 +41,7 @@ export default function ImageDiffView({ imageChanges = [], canReview = false, on
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <ImageIcon size={16} className="text-surface-400" />
-        <h3 className="text-sm font-semibold text-surface-700 uppercase tracking-wider">Image Changes</h3>
+        <h3 className="text-sm font-semibold text-surface-700 uppercase tracking-wider">{t('eco.image_changes', 'Image Changes')}</h3>
         <span className="text-xs text-surface-400 font-medium">({imageChanges.length})</span>
       </div>
 
@@ -56,9 +58,9 @@ export default function ImageDiffView({ imageChanges = [], canReview = false, on
             <div className="px-5 py-3 bg-surface-50 border-b border-surface-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${labelColors[change.changeType] || labelColors.pending}`}>
-                  {labelText[change.changeType] || 'Image'}
+                  {t(`eco.image_state_${change.changeType || 'pending'}`, change.changeType === 'added' ? 'New Image' : change.changeType === 'removed' ? 'Removed' : change.changeType === 'modified' ? 'Updated' : 'Pending Review')}
                 </span>
-                <span className="text-sm font-medium text-surface-700">{change.label || change.newImage?.name || 'Image'}</span>
+                <span className="text-sm font-medium text-surface-700">{change.label || change.newImage?.name || t('common.image', 'Image')}</span>
               </div>
               {change.reviewStatus && (
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
@@ -66,7 +68,7 @@ export default function ImageDiffView({ imageChanges = [], canReview = false, on
                   change.reviewStatus === 'rejected' ? 'bg-danger-100 text-danger-700' :
                   'bg-surface-100 text-surface-500'
                 }`}>
-                  {change.reviewStatus === 'approved' ? '✓ Approved' : change.reviewStatus === 'rejected' ? '✗ Rejected' : '● Pending'}
+                  {change.reviewStatus === 'approved' ? `✓ ${t('status.approved', 'Approved')}` : change.reviewStatus === 'rejected' ? `✗ ${t('status.rejected', 'Rejected')}` : `● ${t('status.pending', 'Pending')}`}
                 </span>
               )}
             </div>
@@ -75,7 +77,7 @@ export default function ImageDiffView({ imageChanges = [], canReview = false, on
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-surface-200">
               {/* Old Image */}
               <div className="p-4">
-                <p className="text-xs font-semibold text-surface-400 uppercase mb-3">Current Version</p>
+                <p className="text-xs font-semibold text-surface-400 uppercase mb-3">{t('eco.current_version', 'Current Version')}</p>
                 {change.oldImage ? (
                   <div
                     onClick={() => onPreviewImage && onPreviewImage([change.oldImage], 0)}
@@ -86,7 +88,7 @@ export default function ImageDiffView({ imageChanges = [], canReview = false, on
                     <img src={change.oldImage.url} alt="Current" className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = '/logo.svg'; e.target.className = 'w-1/2 h-1/2 object-contain opacity-20'; }} loading="lazy" />
                     {change.changeType === 'removed' && (
                       <div className="absolute inset-0 bg-danger-500/20 flex items-center justify-center">
-                        <span className="px-3 py-1.5 bg-danger-600 text-white text-xs font-bold rounded-full">TO BE REMOVED</span>
+                        <span className="px-3 py-1.5 bg-danger-600 text-white text-xs font-bold rounded-full">{t('eco.to_be_removed', 'TO BE REMOVED')}</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -95,14 +97,14 @@ export default function ImageDiffView({ imageChanges = [], canReview = false, on
                   </div>
                 ) : (
                   <div className="aspect-[4/3] rounded-xl bg-surface-50 border-2 border-dashed border-surface-200 flex items-center justify-center">
-                    <span className="text-xs text-surface-300 font-medium">No previous image</span>
+                    <span className="text-xs text-surface-300 font-medium">{t('eco.no_prev_image', 'No previous image')}</span>
                   </div>
                 )}
               </div>
 
               {/* New Image */}
               <div className="p-4">
-                <p className="text-xs font-semibold text-surface-400 uppercase mb-3">Proposed Version</p>
+                <p className="text-xs font-semibold text-surface-400 uppercase mb-3">{t('eco.proposed_version', 'Proposed Version')}</p>
                 {change.newImage ? (
                   <div
                     onClick={() => onPreviewImage && onPreviewImage([change.newImage], 0)}
@@ -117,7 +119,7 @@ export default function ImageDiffView({ imageChanges = [], canReview = false, on
                   </div>
                 ) : (
                   <div className="aspect-[4/3] rounded-xl bg-surface-50 border-2 border-dashed border-surface-200 flex items-center justify-center">
-                    <span className="text-xs text-surface-300 font-medium">Image will be removed</span>
+                    <span className="text-xs text-surface-300 font-medium">{t('eco.image_will_be_removed', 'Image will be removed')}</span>
                   </div>
                 )}
               </div>
@@ -135,19 +137,19 @@ export default function ImageDiffView({ imageChanges = [], canReview = false, on
                           type="text"
                           value={comment}
                           onChange={e => setComment(e.target.value)}
-                          placeholder="Add review comment..."
+                          placeholder={t('eco.add_review_comment', 'Add review comment...')}
                           className="w-full pl-9 pr-4 py-2 rounded-lg border border-surface-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 transition"
                         />
                       </div>
                       <div className="flex items-center gap-2">
                         <button onClick={() => handleReview(change.id || idx, 'approved')} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-success-600 text-white text-xs font-medium rounded-lg hover:bg-success-700 transition-colors">
-                          <CheckCircle size={14} /> Approve Image
+                          <CheckCircle size={14} /> {t('eco.approve_image', 'Approve Image')}
                         </button>
                         <button onClick={() => handleReview(change.id || idx, 'rejected')} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-danger-600 text-white text-xs font-medium rounded-lg hover:bg-danger-700 transition-colors">
-                          <XCircle size={14} /> Reject Image
+                          <XCircle size={14} /> {t('eco.reject_image', 'Reject Image')}
                         </button>
                         <button onClick={() => { setCommentingId(null); setComment(''); }} className="px-3 py-1.5 text-xs font-medium text-surface-500 hover:text-surface-700 transition-colors">
-                          Cancel
+                          {t('actions.cancel', 'Cancel')}
                         </button>
                       </div>
                     </motion.div>
@@ -157,7 +159,7 @@ export default function ImageDiffView({ imageChanges = [], canReview = false, on
                     onClick={() => setCommentingId(change.id || idx)}
                     className="text-xs font-medium text-primary-600 hover:text-primary-700 transition-colors"
                   >
-                    Review this image →
+                    {t('eco.review_this_image', 'Review this image →')}
                   </button>
                 )}
               </div>

@@ -1,5 +1,4 @@
 const express = require('express');
-const ApprovalRule = require('../models/ApprovalRule');
 const authMiddleware = require('../middleware/auth');
 const roleMiddleware = require('../middleware/roles');
 
@@ -8,8 +7,8 @@ const router = express.Router();
 // GET /api/approval-rules — List all rules
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const rules = await ApprovalRule.find();
-    res.json({ success: true, data: rules });
+    const result = await req.db('SELECT * FROM approval_rules ORDER BY created_at DESC');
+    res.json({ success: true, data: result.rows });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch approval rules' });
   }
@@ -19,16 +18,17 @@ router.get('/', authMiddleware, async (req, res) => {
 router.post('/', authMiddleware, roleMiddleware(['Admin']), async (req, res) => {
   try {
     const { name, conditions, stage, requiredRole, status } = req.body;
-    const rule = await ApprovalRule.create({
-      id: `ar${Date.now()}`,
-      name,
-      conditions,
-      stage,
-      requiredRole,
-      status: status || 'Active'
-    });
-    res.status(201).json({ success: true, data: rule });
+    const id = `ar${Date.now()}`;
+
+    const result = await req.db(
+      `INSERT INTO approval_rules (id, name, conditions, stage, required_role, status, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING *`,
+      [id, name, JSON.stringify(conditions || []), stage, requiredRole, status || 'Active']
+    );
+
+    res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error) {
+    console.error('[APPROVAL RULES PROB]', error);
     res.status(500).json({ success: false, message: 'Failed to create approval rule' });
   }
 });
@@ -36,20 +36,25 @@ router.post('/', authMiddleware, roleMiddleware(['Admin']), async (req, res) => 
 // PUT /api/approval-rules/:id — Update rule (Admin only)
 router.put('/:id', authMiddleware, roleMiddleware(['Admin']), async (req, res) => {
   try {
-    const rule = await ApprovalRule.findOne({ _id: req.params.id });
-    if (!rule) {
+    const { name, conditions, stage, requiredRole, status } = req.body;
+
+    const result = await req.db(
+      `UPDATE approval_rules 
+       SET name = COALESCE($1, name), 
+           conditions = COALESCE($2, conditions), 
+           stage = COALESCE($3, stage), 
+           required_role = COALESCE($4, required_role), 
+           status = COALESCE($5, status),
+           updated_at = NOW()
+       WHERE id = $6 RETURNING *`,
+      [name, conditions ? JSON.stringify(conditions) : null, stage, requiredRole, status, req.params.id]
+    );
+
+    if (result.rowCount === 0) {
       return res.status(404).json({ success: false, message: 'Rule not found' });
     }
 
-    const { name, conditions, stage, requiredRole, status } = req.body;
-    if (name) rule.name = name;
-    if (conditions) rule.conditions = conditions;
-    if (stage) rule.stage = stage;
-    if (requiredRole) rule.requiredRole = requiredRole;
-    if (status) rule.status = status;
-
-    await rule.save();
-    res.json({ success: true, data: rule });
+    res.json({ success: true, data: result.rows[0] });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to update approval rule' });
   }
@@ -58,10 +63,12 @@ router.put('/:id', authMiddleware, roleMiddleware(['Admin']), async (req, res) =
 // DELETE /api/approval-rules/:id — Delete rule (Admin only)
 router.delete('/:id', authMiddleware, roleMiddleware(['Admin']), async (req, res) => {
   try {
-    const rule = await ApprovalRule.findOneAndDelete({ _id: req.params.id });
-    if (!rule) {
+    const result = await req.db('DELETE FROM approval_rules WHERE id = $1 RETURNING *', [req.params.id]);
+
+    if (result.rowCount === 0) {
       return res.status(404).json({ success: false, message: 'Rule not found' });
     }
+
     res.json({ success: true, message: 'Rule deleted' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to delete approval rule' });

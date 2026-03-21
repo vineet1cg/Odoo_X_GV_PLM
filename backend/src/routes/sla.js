@@ -1,33 +1,27 @@
 const express = require('express');
-const ECO = require('../models/ECO');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
 const SLA_THRESHOLDS = {
-  'New':       { warn: 24 * 3600000, escalate: 48 * 3600000 },
+  'New': { warn: 24 * 3600000, escalate: 48 * 3600000 },
   'In Review': { warn: 12 * 3600000, escalate: 24 * 3600000 },
-  'Approval':  { warn: 8 * 3600000,  escalate: 16 * 3600000 },
+  'Approval': { warn: 8 * 3600000, escalate: 16 * 3600000 },
 };
 
 // GET /api/ecos/sla/status
 router.get('/sla/status', authMiddleware, async (req, res) => {
   try {
-    const ecos = await ECO.find({
-      stage: { $nin: ['Done', 'Rejected'] }
-    }).select('_id id ecoNumber title stage stageEnteredAt slaEscalated approvalLogs');
+    const result = await req.db(
+      "SELECT id, eco_number, title, stage, stage_entered_at FROM ecos WHERE stage NOT IN ('Done', 'Rejected')"
+    );
 
-    const slaData = ecos.map(eco => {
-      // Fallback: if stageEnteredAt missing, use last log timestamp or Date.now()
-      let enteredAt = eco.stageEnteredAt ? new Date(eco.stageEnteredAt) : null;
-      if (!enteredAt && eco.approvalLogs && eco.approvalLogs.length > 0) {
-         enteredAt = new Date(eco.approvalLogs[eco.approvalLogs.length - 1].timestamp);
-      }
-      if (!enteredAt) enteredAt = new Date();
+    const slaData = result.rows.map(eco => {
+      let enteredAt = eco.stage_entered_at ? new Date(eco.stage_entered_at) : new Date();
 
       const timeInStageMs = Date.now() - enteredAt.getTime();
       const thresholds = SLA_THRESHOLDS[eco.stage] || { warn: Infinity, escalate: Infinity };
-      
+
       let status = 'OK';
       if (timeInStageMs >= thresholds.escalate) status = 'CRITICAL';
       else if (timeInStageMs >= thresholds.warn) status = 'WARNING';
@@ -35,24 +29,20 @@ router.get('/sla/status', authMiddleware, async (req, res) => {
       const formatTime = (ms) => {
         const h = Math.floor(ms / 3600000);
         const m = Math.floor((ms % 3600000) / 60000);
-        if (h > 48) return `${Math.floor(h/24)}d ${h%24}h`;
+        if (h > 48) return `${Math.floor(h / 24)}d ${h % 24}h`;
         if (h > 0) return `${h}h ${m}m`;
         return `${m}m`;
       };
 
-      const percentageVal = Math.min((timeInStageMs / thresholds.escalate) * 100, 150);
-
       return {
-        ecoId: eco._id,
-        ecoNumber: eco.ecoNumber,
+        ecoId: eco.id,
+        ecoNumber: eco.eco_number,
         title: eco.title,
         stage: eco.stage,
         timeInStage: timeInStageMs,
         timeInStageHuman: formatTime(timeInStageMs),
         slaStatus: status,
-        warnThreshold: thresholds.warn,
-        escalateThreshold: thresholds.escalate,
-        percentageUsed: percentageVal,
+        percentageUsed: Math.min((timeInStageMs / thresholds.escalate) * 100, 150),
         enteredAt: enteredAt.toISOString(),
         escalationDue: new Date(enteredAt.getTime() + thresholds.escalate).toISOString()
       };

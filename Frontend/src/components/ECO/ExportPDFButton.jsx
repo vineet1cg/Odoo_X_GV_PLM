@@ -3,8 +3,10 @@ import { Download, Loader2 } from 'lucide-react';
 import { generateECOPdf } from '../../utils/pdfGenerator';
 import toast from 'react-hot-toast';
 import { secureGet } from '../../capacitor/nativeServices';
+import { useTranslation } from 'react-i18next';
 
 export default function ExportPDFButton({ eco }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const handleExport = async () => {
@@ -19,9 +21,9 @@ export default function ExportPDFButton({ eco }) {
       if (!json.success) throw new Error(json.message);
       
       generateECOPdf(json.data.eco, json.data.generatedBy);
-      toast.success('PDF downloaded successfully');
+      toast.success(t('eco.pdf_success', 'PDF downloaded successfully'));
     } catch (err) {
-      toast.error('Failed to generate PDF');
+      toast.error(t('eco.pdf_failed', 'Failed to generate PDF'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -39,7 +41,7 @@ export default function ExportPDFButton({ eco }) {
         active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
     >
       {loading ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
-      {loading ? 'Generating...' : 'Export PDF'}
+      {loading ? t('eco.generating', 'Generating...') : t('eco.export_pdf', 'Export PDF')}
     </button>
   );
 }

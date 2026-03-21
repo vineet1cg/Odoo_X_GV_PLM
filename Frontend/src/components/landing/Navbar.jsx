@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Settings, Menu, X } from 'lucide-react'
 import TealButton from './ui/TealButton'
+import { useTranslation } from 'react-i18next'
 
 export default function Navbar() {
+  const { t } = useTranslation()
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -16,10 +18,9 @@ export default function Navbar() {
   }, [])
 
   const navLinks = [
-    { label: 'Features', href: '#features' },
-    { label: 'How it works', href: '#how-it-works' },
-    { label: 'Roles', href: '#roles' },
-    { label: 'Pricing', href: '#pricing' },
+    { label: t('landing.nav.features', 'Features'), href: '#features' },
+    { label: t('landing.nav.how_it_works', 'How it works'), href: '#how-it-works' },
+    { label: t('landing.nav.roles', 'Roles'), href: '#roles' },
   ]
 
   return (
@@ -40,7 +41,7 @@ export default function Navbar() {
               PLM
             </span>
             <span className="text-[10px] leading-tight text-[#a19982] font-bold tracking-widest uppercase mt-0.5">
-              Change Control
+              {t('landing.logo_subtitle', 'Change Control')}
             </span>
           </div>
         </Link>
@@ -62,10 +63,10 @@ export default function Navbar() {
         {/* Right Actions */}
         <div className="hidden md:flex items-center gap-4 relative z-50">
           <Link to="/login" className="text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors">
-            Sign In
+            {t('auth.login', 'Sign In')}
           </Link>
           <Link to="/login">
-            <TealButton size="sm" glow>Get Started</TealButton>
+            <TealButton size="sm" glow>{t('landing.get_started', 'Get Started')}</TealButton>
           </Link>
         </div>
 
@@ -100,10 +101,10 @@ export default function Navbar() {
               className="w-full py-4 text-center rounded-xl bg-white/50 border border-black/5 text-slate-800 font-bold hover:bg-white/80 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Sign In
+              {t('auth.login', 'Sign In')}
             </Link>
             <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-              <TealButton className="w-full py-4 justify-center text-lg italic shadow-xl" size="lg" glow>Get Started Now</TealButton>
+              <TealButton className="w-full py-4 justify-center text-lg italic shadow-xl" size="lg" glow>{t('landing.get_started_now', 'Get Started Now')}</TealButton>
             </Link>
           </div>
         </div>

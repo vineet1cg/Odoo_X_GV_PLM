@@ -10,8 +10,10 @@ import StatusBadge from '../components/ui/StatusBadge';
 import EmptyState from '../components/ui/EmptyState';
 import { Search, Package, ArrowUpRight, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function Products() {
+  const { t } = useTranslation();
   const { fetchPaginatedProducts, isReadOnly } = useApp();
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,8 +63,8 @@ export default function Products() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-surface-800 tracking-tight">Products</h1>
-          <p className="text-sm text-surface-500 mt-1">Managed product catalog with version control</p>
+          <h1 className="text-2xl font-bold text-surface-800 tracking-tight">{t('products.title')}</h1>
+          <p className="text-sm text-surface-500 mt-1">{t('products.subtitle')}</p>
         </div>
       </div>
 
@@ -74,7 +76,7 @@ export default function Products() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products..."
+            placeholder={t('products.search')}
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-surface-200 bg-surface-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400 transition"
           />
         </div>
@@ -89,7 +91,7 @@ export default function Products() {
                   : 'text-surface-500 hover:text-surface-700'
               }`}
             >
-              {status}
+              {t(`products.${status.toLowerCase()}`)}
             </button>
           ))}
         </div>
@@ -99,10 +101,10 @@ export default function Products() {
       {isLoading ? (
         <div className="bg-surface-100 sm:rounded-xl sm:border border-surface-200 py-20 flex flex-col items-center justify-center space-y-4">
           <Loader2 className="animate-spin text-primary-600" size={32} />
-          <p className="text-surface-500 font-medium">Loading product catalog...</p>
+          <p className="text-surface-500 font-medium">{t('products.loading')}</p>
         </div>
       ) : products.length === 0 ? (
-        <EmptyState title="No products found" description="Try adjusting your search or filters." icon={Package} />
+        <EmptyState title={t('products.no_products')} description={t('products.no_results')} icon={Package} />
       ) : (
         <>
         <motion.div
@@ -115,11 +117,11 @@ export default function Products() {
             <table className="w-full min-w-[800px]">
             <thead>
               <tr className="bg-surface-50 border-b border-surface-200">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Product</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">SKU</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Category</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Version</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Status</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('eco.product')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('products.sku')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('products.category')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('products.version')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('products.status')}</th>
                 <th className="px-6 py-3"></th>
               </tr>
             </thead>
@@ -154,7 +156,7 @@ export default function Products() {
                       to={`/products/${product.id || product._id}`}
                       className="opacity-0 group-hover:opacity-100 inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700 transition-all"
                     >
-                      View <ArrowUpRight size={12} />
+                      {t('actions.view')} <ArrowUpRight size={12} />
                     </Link>
                   </td>
                 </motion.tr>
@@ -185,11 +187,11 @@ export default function Products() {
                 
                 <div className="grid grid-cols-2 gap-2 mb-4">
                   <div>
-                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">Category</p>
+                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">{t('products.category')}</p>
                     <p className="text-sm text-surface-700 font-medium">{product.category}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">Version</p>
+                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">{t('products.version')}</p>
                     <p className="text-sm text-surface-700 font-medium font-mono">v{product.version}</p>
                   </div>
                 </div>
@@ -198,7 +200,7 @@ export default function Products() {
                   to={`/products/${product.id || product._id}`}
                   className="w-full inline-flex justify-center items-center gap-2 py-2.5 bg-surface-50 hover:bg-surface-100 text-surface-700 font-medium text-sm rounded-lg transition-colors border border-surface-200"
                 >
-                  View Details <ArrowUpRight size={14} />
+                  {t('products.view_details')} <ArrowUpRight size={14} />
                 </Link>
               </motion.div>
             ))}
@@ -208,7 +210,7 @@ export default function Products() {
         {/* Pagination Controls */}
         <div className="px-6 py-4 border-t border-surface-200 bg-surface-50 flex items-center justify-between rounded-xl shadow-sm mt-4">
           <p className="text-sm text-surface-500">
-            Showing <span className="font-medium text-surface-800">{(page - 1) * limit + 1}</span> to <span className="font-medium text-surface-800">{Math.min(page * limit, totalProducts)}</span> of <span className="font-medium text-surface-800">{totalProducts}</span> Products
+            {t('admin.showing')} <span className="font-medium text-surface-800">{(page - 1) * limit + 1}</span> {t('admin.to')} <span className="font-medium text-surface-800">{Math.min(page * limit, totalProducts)}</span> {t('admin.of')} <span className="font-medium text-surface-800">{totalProducts}</span> {t('products.title')}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -216,17 +218,17 @@ export default function Products() {
               disabled={page === 1}
               className="inline-flex items-center gap-1 px-3 py-1.5 border border-surface-300 rounded-lg text-sm font-medium text-surface-700 bg-white hover:bg-surface-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronLeft size={16} /> Previous
+              <ChevronLeft size={16} /> {t('admin.prev')}
             </button>
             <div className="px-3 py-1.5 text-sm font-medium text-surface-700">
-              Page {page} of {totalPages}
+              {t('admin.page')} {page} {t('admin.of')} {totalPages}
             </div>
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
               className="inline-flex items-center gap-1 px-3 py-1.5 border border-surface-300 rounded-lg text-sm font-medium text-surface-700 bg-white hover:bg-surface-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Next <ChevronRight size={16} />
+              {t('admin.next')} <ChevronRight size={16} />
             </button>
           </div>
         </div>

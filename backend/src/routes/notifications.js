@@ -1,5 +1,4 @@
 const express = require('express');
-const Notification = require('../models/Notification');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
@@ -7,8 +6,8 @@ const router = express.Router();
 // GET /api/notifications — List all notifications
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const notifications = await Notification.find().sort({ timestamp: -1 });
-    res.json({ success: true, data: notifications });
+    const result = await req.db('SELECT * FROM notifications ORDER BY created_at DESC');
+    res.json({ success: true, data: result.rows });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch notifications' });
   }
@@ -17,15 +16,16 @@ router.get('/', authMiddleware, async (req, res) => {
 // PATCH /api/notifications/:id/read — Mark notification as read
 router.patch('/:id/read', authMiddleware, async (req, res) => {
   try {
-    const notification = await Notification.findOne({ _id: req.params.id });
-    if (!notification) {
+    const result = await req.db(
+      'UPDATE notifications SET read = true WHERE id = $1 RETURNING *',
+      [req.params.id]
+    );
+
+    if (result.rowCount === 0) {
       return res.status(404).json({ success: false, message: 'Notification not found' });
     }
 
-    notification.read = true;
-    await notification.save();
-
-    res.json({ success: true, data: notification });
+    res.json({ success: true, data: result.rows[0] });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to mark notification as read' });
   }
@@ -35,15 +35,15 @@ router.patch('/:id/read', authMiddleware, async (req, res) => {
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { title, type, ecoId } = req.body;
-    const notification = await Notification.create({
-      id: `n${Date.now()}`,
-      title,
-      type: type || 'info',
-      ecoId: ecoId || null,
-      read: false,
-      timestamp: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-    });
-    res.status(201).json({ success: true, data: notification });
+    const id = `n${Date.now()}`;
+    
+    const result = await req.db(
+      `INSERT INTO notifications (id, title, type, eco_id, read, created_at)
+       VALUES ($1, $2, $3, $4, false, NOW()) RETURNING *`,
+      [id, title, type || 'info', ecoId || null]
+    );
+
+    res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to create notification' });
   }

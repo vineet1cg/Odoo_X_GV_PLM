@@ -12,8 +12,10 @@ import SLATimer from '../components/ECO/SLATimer';
 import { Search, FileText, Plus, ArrowUpRight, Filter, Paperclip, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { secureGet } from '../capacitor/nativeServices';
+import { useTranslation } from 'react-i18next';
 
 export default function EcoList() {
+  const { t } = useTranslation();
   const { fetchPaginatedEcos, canCreateEco } = useApp();
   const [ecos, setEcos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,15 +91,15 @@ export default function EcoList() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-surface-800 tracking-tight">Engineering Change Orders</h1>
-          <p className="text-sm text-surface-500 mt-1">Manage all product and BoM changes through controlled workflow</p>
+          <h1 className="text-2xl font-bold text-surface-800 tracking-tight">{t('eco.title')}</h1>
+          <p className="text-sm text-surface-500 mt-1">{t('eco.subtitle')}</p>
         </div>
         {canCreateEco && (
           <Link
             to="/eco/create"
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm hover:shadow-md"
           >
-            <Plus size={16} /> New ECO
+            <Plus size={16} /> {t('eco.new_eco')}
           </Link>
         )}
       </div>
@@ -110,7 +112,7 @@ export default function EcoList() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search ECOs..."
+            placeholder={t('eco.search')}
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-surface-200 bg-surface-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400 transition"
           />
         </div>
@@ -126,7 +128,7 @@ export default function EcoList() {
                   : 'bg-surface-100 text-surface-500 hover:bg-surface-200 hover:text-surface-700'
               }`}
             >
-              {stage}
+              {t(`eco.${stage.toLowerCase().replace(/\s/g, '_')}`)}
             </button>
           ))}
         </div>
@@ -136,16 +138,16 @@ export default function EcoList() {
       {isLoading ? (
         <div className="bg-surface-100 sm:rounded-xl sm:border border-surface-200 py-20 flex flex-col items-center justify-center space-y-4">
           <Loader2 className="animate-spin text-primary-600" size={32} />
-          <p className="text-surface-500 font-medium">Loading engineering changes...</p>
+          <p className="text-surface-500 font-medium">{t('eco.loading')}</p>
         </div>
       ) : ecos.length === 0 ? (
         <EmptyState
-          title="No ECOs found"
-          description="No engineering change orders match your criteria."
+          title={t('eco.no_ecos')}
+          description={t('boms.no_results')}
           icon={FileText}
           action={canCreateEco ? (
             <Link to="/eco/create" className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
-              <Plus size={16} /> Create New ECO
+              <Plus size={16} /> {t('eco.new_eco')}
             </Link>
           ) : null}
         />
@@ -157,13 +159,13 @@ export default function EcoList() {
             <table className="w-full min-w-[1000px]">
             <thead>
               <tr className="bg-surface-50 border-b border-surface-200">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">ECO Number</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Title</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Type</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Product</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Stage</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Priority</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">Created By</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('eco.eco_num')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('eco.eco_title')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('eco.type')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('eco.product')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('eco.stage')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('eco.priority_label')}</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-surface-400 uppercase tracking-wider">{t('eco.created_by')}</th>
                 <th className="px-6 py-3"></th>
               </tr>
             </thead>
@@ -210,14 +212,20 @@ export default function EcoList() {
                     )}
                   </td>
                   <td className="px-6 py-4">
-                    <StatusBadge status={eco.priority} />
+                    {eco.priority === 'High' ? (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider bg-danger-50 text-danger-700">
+                        {t('priority.High')}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-surface-600">{t(`priority.${eco.priority}`)}</span>
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-sm text-surface-500">{eco.createdByName}</span>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <Link to={`/eco/${eco.id || eco._id}`} className="opacity-0 group-hover:opacity-100 inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700 transition-all">
-                      View <ArrowUpRight size={12} />
+                      {t('actions.view')} <ArrowUpRight size={12} />
                     </Link>
                   </td>
                 </motion.tr>
@@ -249,11 +257,11 @@ export default function EcoList() {
                 
                 <div className="grid grid-cols-2 gap-2 mb-4">
                   <div>
-                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">Type</p>
+                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">{t('eco.type')}</p>
                     <div className="mt-0.5"><StatusBadge status={eco.type}/></div>
                   </div>
                   <div>
-                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">Product</p>
+                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">{t('eco.product')}</p>
                     <p className="text-sm text-surface-700 font-medium truncate mt-0.5">{eco.productName}</p>
                   </div>
                 </div>
@@ -262,7 +270,7 @@ export default function EcoList() {
                   to={`/eco/${eco.id || eco._id}`}
                   className="w-full inline-flex justify-center items-center gap-2 py-2.5 bg-surface-50 hover:bg-surface-100 text-surface-700 font-medium text-sm rounded-lg transition-colors border border-surface-200"
                 >
-                  View ECO Details <ArrowUpRight size={14} />
+                  {t('eco.view_eco')} <ArrowUpRight size={14} />
                 </Link>
               </motion.div>
             ))}
@@ -272,7 +280,7 @@ export default function EcoList() {
         {/* Pagination Controls */}
         <div className="px-6 py-4 border-t border-surface-200 bg-surface-50 flex items-center justify-between rounded-xl shadow-sm mt-4">
           <p className="text-sm text-surface-500">
-            Showing <span className="font-medium text-surface-800">{(page - 1) * limit + 1}</span> to <span className="font-medium text-surface-800">{Math.min(page * limit, totalEcos)}</span> of <span className="font-medium text-surface-800">{totalEcos}</span> ECOs
+            {t('admin.showing')} <span className="font-medium text-surface-800">{(page - 1) * limit + 1}</span> {t('admin.to')} <span className="font-medium text-surface-800">{Math.min(page * limit, totalEcos)}</span> {t('admin.of')} <span className="font-medium text-surface-800">{totalEcos}</span> {t('nav.ecos')}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -280,17 +288,17 @@ export default function EcoList() {
               disabled={page === 1}
               className="inline-flex items-center gap-1 px-3 py-1.5 border border-surface-300 rounded-lg text-sm font-medium text-surface-700 bg-white hover:bg-surface-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronLeft size={16} /> Previous
+              <ChevronLeft size={16} /> {t('admin.prev')}
             </button>
             <div className="px-3 py-1.5 text-sm font-medium text-surface-700">
-              Page {page} of {totalPages}
+              {t('admin.page')} {page} {t('admin.of')} {totalPages}
             </div>
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
               className="inline-flex items-center gap-1 px-3 py-1.5 border border-surface-300 rounded-lg text-sm font-medium text-surface-700 bg-white hover:bg-surface-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Next <ChevronRight size={16} />
+              {t('admin.next')} <ChevronRight size={16} />
             </button>
           </div>
         </div>

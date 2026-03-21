@@ -11,6 +11,7 @@ import Sidebar from './components/layout/Sidebar';
 import Topbar from './components/layout/Topbar';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
+import PublicECOView from './pages/PublicECOView';
 import { useApp } from './context/AppContext';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -145,7 +146,10 @@ export default function App() {
     <Router>
       <NetworkBanner />
       <AppProvider>
-        <AppLayout />
+        <Routes>
+          <Route path="/eco/:id/public" element={<PublicECOView />} />
+          <Route path="*" element={<AppLayout />} />
+        </Routes>
       </AppProvider>
     </Router>
   );
