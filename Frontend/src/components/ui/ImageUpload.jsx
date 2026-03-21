@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function ImageUpload({ images = [], onImagesChange, disabled = false, maxFiles = 10, maxSizeMB = 10 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
+  const [previewImage, setPreviewImage] = useState(null);
   const fileInputRef = useRef(null);
 
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
@@ -140,7 +141,7 @@ export default function ImageUpload({ images = [], onImagesChange, disabled = fa
 
       {/* Uploaded Thumbnails */}
       {images.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="flex overflow-x-auto sm:grid sm:grid-cols-3 lg:grid-cols-4 gap-3 pb-2 sm:pb-0 snap-x">
           <AnimatePresence>
             {images.map((img) => (
               <motion.div
@@ -148,7 +149,8 @@ export default function ImageUpload({ images = [], onImagesChange, disabled = fa
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className={`group relative bg-white rounded-xl border overflow-hidden ${
+                onClick={() => img.type !== 'application/pdf' && setPreviewImage(img)}
+                className={`group relative bg-white rounded-xl border flex-shrink-0 w-44 sm:w-auto snap-center overflow-hidden cursor-pointer ${
                   img.reviewStatus === 'approved' ? 'border-success-300 ring-1 ring-success-200' :
                   img.reviewStatus === 'rejected' ? 'border-danger-300 ring-1 ring-danger-200' :
                   'border-surface-200 hover:border-surface-300'
@@ -212,6 +214,39 @@ export default function ImageUpload({ images = [], onImagesChange, disabled = fa
           <span>Uploaded images are part of this ECO and will only be applied to the product after approval. They do not replace existing images until the ECO is completed.</span>
         </div>
       )}
+
+      {/* Fullscreen Image Preview */}
+      <AnimatePresence>
+        {previewImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-surface-900/95 flex items-center justify-center p-4 sm:p-8 backdrop-blur-sm"
+            onClick={() => setPreviewImage(null)}
+          >
+            <button
+              className="absolute top-4 right-4 p-2 bg-surface-800/50 hover:bg-surface-800 rounded-full text-white transition-colors"
+              onClick={() => setPreviewImage(null)}
+            >
+              <X size={24} />
+            </button>
+            <motion.img
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              src={previewImage.url}
+              alt={previewImage.name}
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-surface-900/80 px-4 py-2 rounded-full text-white text-sm font-medium backdrop-blur-md">
+              {previewImage.name}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

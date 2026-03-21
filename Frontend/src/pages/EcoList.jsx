@@ -81,8 +81,9 @@ export default function EcoList() {
           ) : null}
         />
       ) : (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-xl border border-surface-200 overflow-hidden">
-          <div className="overflow-x-auto w-full">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-white sm:rounded-xl sm:border border-surface-200 overflow-hidden">
+          {/* Desktop/Tablet Table View */}
+          <div className="hidden sm:block overflow-x-auto w-full">
             <table className="w-full min-w-[1000px]">
             <thead>
               <tr className="bg-surface-50 border-b border-surface-200">
@@ -143,6 +144,62 @@ export default function EcoList() {
             </tbody>
           </table>
           </div>
+
+          {/* Mobile Card View */}
+          <div className="grid grid-cols-1 gap-4 sm:hidden">
+            {filtered.map((eco, idx) => (
+              <motion.div
+                key={eco.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.04 }}
+                className="bg-white border text-left border-surface-200 rounded-xl p-4 shadow-sm"
+              >
+                <div className="flex justify-between items-start mb-3">
+                   <div>
+                      <Link to={`/eco/${eco.id}`} className="text-sm font-mono font-medium text-primary-600 hover:text-primary-700">{eco.ecoNumber}</Link>
+                      <Link to={`/eco/${eco.id}`} className="block text-base font-semibold text-surface-800 hover:text-primary-600 mt-1">{eco.title}</Link>
+                   </div>
+                   <div className="flex flex-col gap-1 items-end">
+                      <StatusBadge status={eco.stage} />
+                      <StatusBadge status={eco.priority} />
+                   </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  <div>
+                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">Type</p>
+                    <div className="mt-0.5"><StatusBadge status={eco.type}/></div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">Product</p>
+                    <p className="text-sm text-surface-700 font-medium truncate mt-0.5">{eco.productName}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">Author</p>
+                    <p className="text-sm text-surface-700 font-medium mt-0.5">{eco.createdByName}</p>
+                  </div>
+                  {(eco.attachedImages?.length > 0 || eco.imageChanges?.length > 0) && (
+                    <div>
+                      <p className="text-[10px] text-surface-400 font-semibold uppercase tracking-wider">Attachments</p>
+                      <p className="text-sm text-surface-700 font-medium mt-0.5 inline-flex items-center gap-1">
+                        <Paperclip size={12} className="text-surface-400" />
+                        {(eco.attachedImages?.length || 0) + (eco.imageChanges?.length || 0)} files
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <Link
+                  to={`/eco/${eco.id}`}
+                  className="w-full inline-flex justify-center items-center gap-2 py-2.5 bg-surface-50 hover:bg-surface-100 text-surface-700 font-medium text-sm rounded-lg transition-colors border border-surface-200"
+                >
+                  View ECO Details <ArrowUpRight size={14} />
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+
         </motion.div>
       )}
     </div>

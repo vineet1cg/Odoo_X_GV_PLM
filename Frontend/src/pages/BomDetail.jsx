@@ -57,13 +57,15 @@ export default function BomDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Components Table */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="lg:col-span-2 bg-white rounded-xl border border-surface-200 overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="lg:col-span-2 bg-white sm:rounded-xl sm:border border-surface-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-surface-100 flex items-center gap-2">
             <Wrench size={16} className="text-surface-400" />
             <h2 className="text-base font-semibold text-surface-800">Components</h2>
             <span className="text-xs text-surface-400 ml-auto">{bom.components.length} parts · Total cost: ${totalCost.toFixed(2)}</span>
           </div>
-          <div className="overflow-x-auto w-full">
+          
+          {/* Desktop/Tablet Table View */}
+          <div className="hidden sm:block overflow-x-auto w-full">
             <table className="w-full min-w-[700px]">
             <thead>
               <tr className="bg-surface-50 border-b border-surface-200">
@@ -86,6 +88,34 @@ export default function BomDetail() {
               ))}
             </tbody>
           </table>
+          </div>
+
+          {/* Mobile List View */}
+          <div className="flex flex-col sm:hidden divide-y divide-surface-100">
+            {bom.components.map(c => (
+              <div key={c.id} className="p-4 bg-white hover:bg-surface-50 transition-colors">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <p className="text-sm font-semibold text-surface-800">{c.name}</p>
+                    <p className="text-xs font-mono text-surface-500 mt-0.5">{c.partNumber}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-surface-800">${(c.cost * c.quantity).toFixed(2)}</p>
+                    <p className="text-[10px] text-surface-400">Subtotal</p>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center bg-surface-50 rounded-lg p-2.5">
+                  <div className="text-center flex-1 border-r border-surface-200">
+                    <p className="text-[10px] text-surface-400 font-semibold uppercase">Qty</p>
+                    <p className="text-sm font-medium text-surface-700">{c.quantity} {c.unit}</p>
+                  </div>
+                  <div className="text-center flex-1">
+                    <p className="text-[10px] text-surface-400 font-semibold uppercase">Unit Cost</p>
+                    <p className="text-sm font-medium text-surface-700">${c.cost.toFixed(2)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </motion.div>
 

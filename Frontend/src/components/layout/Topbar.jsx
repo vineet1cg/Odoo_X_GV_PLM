@@ -8,6 +8,7 @@ export default function Topbar({ setMobileMenuOpen }) {
   const { currentUser, switchRole, notificationList, markNotificationRead } = useApp();
   const [showNotif, setShowNotif] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const notifRef = useRef(null);
   const userRef = useRef(null);
@@ -37,13 +38,13 @@ export default function Topbar({ setMobileMenuOpen }) {
         {/* Mobile Menu Toggle */}
         <button
           onClick={() => setMobileMenuOpen(true)}
-          className="md:hidden p-2 -ml-2 text-surface-500 hover:bg-surface-50 rounded-lg"
+          className="sm:hidden p-2 -ml-2 text-surface-500 hover:bg-surface-50 rounded-lg"
         >
           <Menu size={20} />
         </button>
 
         {/* Search */}
-        <div className="relative flex-1">
+        <div className={`relative flex-1 ${showMobileSearch ? 'flex' : 'hidden sm:block'}`}>
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-400" />
           <input
             type="text"
@@ -51,12 +52,21 @@ export default function Topbar({ setMobileMenuOpen }) {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search products, BoMs..."
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-surface-200 bg-surface-50 text-sm text-surface-700 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400 transition-all"
+            autoFocus={showMobileSearch}
           />
         </div>
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-2 sm:gap-4 ml-4">
+      <div className={`flex items-center gap-2 sm:gap-4 ml-4 ${showMobileSearch ? 'hidden' : 'flex'}`}>
+        
+        {/* Mobile Search Toggle */}
+        <button
+          onClick={() => setShowMobileSearch(true)}
+          className="sm:hidden p-2 text-surface-500 hover:bg-surface-50 rounded-lg"
+        >
+          <Search size={20} />
+        </button>
         {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <button

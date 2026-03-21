@@ -46,11 +46,17 @@ function AnimatedRoutes() {
 
 function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="min-h-[100dvh] bg-surface-50 flex flex-col md:block">
-      <Sidebar mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
-      <div className="md:ml-[256px] transition-all duration-300 flex-1 flex flex-col">
+    <div className="min-h-[100dvh] bg-surface-50 flex flex-col sm:block">
+      <Sidebar 
+        mobileMenuOpen={mobileMenuOpen} 
+        setMobileMenuOpen={setMobileMenuOpen} 
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+      />
+      <div className={`transition-all duration-300 flex-1 flex flex-col ${collapsed ? 'sm:ml-[72px]' : 'sm:ml-[72px] lg:ml-[256px]'}`}>
         <Topbar setMobileMenuOpen={setMobileMenuOpen} />
         <main className="p-4 sm:p-6 lg:p-8 flex-1 overflow-x-hidden">
           <AnimatedRoutes />

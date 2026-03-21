@@ -13,8 +13,7 @@ const navItems = [
   { to: '/settings', icon: Settings, label: 'Settings', adminOnly: true },
 ];
 
-export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
-  const [collapsed, setCollapsed] = useState(false);
+export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, setCollapsed }) {
   const { canAccessSettings } = useApp();
   const location = useLocation();
 
@@ -28,7 +27,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
   // Handle resize specifically for clearing mobile menu state
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
+      if (window.innerWidth >= 640) {
         setMobileMenuOpen(false);
       }
     };
@@ -47,20 +46,17 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => setMobileMenuOpen(false)}
-            className="fixed inset-0 bg-surface-900/40 z-40 md:hidden"
+            className="fixed inset-0 bg-surface-900/40 z-40 sm:hidden"
           />
         )}
       </AnimatePresence>
 
-      <motion.aside
-        initial={false}
-        animate={{ 
-          width: collapsed ? 72 : 256,
-          x: mobileMenuOpen ? 0 : (window.innerWidth < 768 ? -256 : 0)
-        }}
-        transition={{ duration: 0.25, ease: 'easeInOut' }}
-        className="fixed left-0 top-0 h-[100dvh] bg-white border-r border-surface-200 z-50 flex flex-col shadow-xl md:shadow-sm"
-        style={{ transform: window.innerWidth < 768 && !mobileMenuOpen ? 'translateX(-100%)' : 'none' }}
+      <aside
+        className={`fixed left-0 top-0 h-[100dvh] bg-white border-r border-surface-200 z-50 flex flex-col shadow-xl sm:shadow-sm transition-all duration-300 group
+          ${mobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full sm:translate-x-0'}
+          ${!mobileMenuOpen ? (collapsed ? 'sm:w-[72px]' : 'sm:w-[72px] lg:w-64') : ''}
+          ${!mobileMenuOpen && !collapsed ? 'hover:w-64' : ''}
+        `}
       >
       {/* Logo */}
       <div className="h-16 flex items-center justify-between px-5 border-b border-surface-200">
@@ -68,26 +64,20 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-sm">P</span>
           </div>
-          <AnimatePresence>
             {(!collapsed || mobileMenuOpen) && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden whitespace-nowrap"
+              <div
+                className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${mobileMenuOpen ? 'w-auto opacity-100' : 'w-0 opacity-0 group-hover:w-auto group-hover:opacity-100 lg:w-auto lg:opacity-100'} ${collapsed ? '!w-0 !opacity-0' : ''}`}
               >
                 <h1 className="text-lg font-bold text-surface-800 tracking-tight">PLM</h1>
                 <p className="text-[10px] text-surface-400 -mt-1 font-medium tracking-wider uppercase">Change Control</p>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
         </div>
         
         {/* Mobile Close Button */}
         <button 
           onClick={() => setMobileMenuOpen(false)}
-          className="md:hidden p-1.5 -mr-2 text-surface-400 hover:text-surface-600 hover:bg-surface-50 rounded-lg"
+          className="sm:hidden p-1.5 -mr-2 text-surface-400 hover:text-surface-600 hover:bg-surface-50 rounded-lg"
         >
           <X size={20} />
         </button>
@@ -110,46 +100,34 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
               title={collapsed ? item.label : undefined}
             >
               <Icon size={20} className={`flex-shrink-0 transition-colors ${isActive ? 'text-primary-600' : 'text-surface-400 group-hover:text-surface-600'}`} />
-              <AnimatePresence>
-                {(!collapsed || mobileMenuOpen) && (
-                  <motion.span
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden whitespace-nowrap"
+              {(!collapsed || mobileMenuOpen) && (
+                  <span
+                    className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${mobileMenuOpen ? 'w-auto opacity-100' : 'w-0 opacity-0 group-hover:w-auto group-hover:opacity-100 lg:w-auto lg:opacity-100'} ${collapsed ? '!w-0 !opacity-0' : ''}`}
                   >
                     {item.label}
-                  </motion.span>
+                  </span>
                 )}
-              </AnimatePresence>
             </NavLink>
           );
         })}
       </nav>
 
-      {/* Collapse Toggle (Desktop Only) */}
-      <div className="p-3 border-t border-surface-200 hidden md:block">
+      <div className="p-3 border-t border-surface-200 hidden lg:block">
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-surface-400 hover:text-surface-600 hover:bg-surface-50 transition-colors"
         >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+          {!collapsed && (
+              <span
                 className="text-xs font-medium"
               >
                 Collapse
-              </motion.span>
+              </span>
             )}
-          </AnimatePresence>
         </button>
       </div>
-    </motion.aside>
+    </aside>
     </>
   );
 }
