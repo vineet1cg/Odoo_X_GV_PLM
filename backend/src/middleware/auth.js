@@ -16,7 +16,7 @@ const authMiddleware = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded.id).select('-password');
+    const user = await User.findOne({ _id: decoded.id }).select('-password');
 
     if (!user) {
       return res.status(401).json({
@@ -26,7 +26,8 @@ const authMiddleware = async (req, res, next) => {
     }
 
     req.user = {
-      id: user._id,
+      id: user.id,
+      userId: user.id,
       name: user.name,
       email: user.email,
       role: user.role
@@ -54,3 +55,4 @@ const authMiddleware = async (req, res, next) => {
 };
 
 module.exports = authMiddleware;
+

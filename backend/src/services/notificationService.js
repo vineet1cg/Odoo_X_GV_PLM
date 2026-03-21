@@ -1,66 +1,41 @@
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 
-const createNotification = async ({ userId, title, type = 'info', ecoId = null }) => {
+const createNotification = async ({ title, type = 'info', ecoId = null }) => {
   try {
     const notification = await Notification.create({
-      userId,
+      id: `n${Date.now()}`,
       title,
       type,
       ecoId,
-      read: false
+      read: false,
+      timestamp: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
     });
-
     return notification;
   } catch (error) {
     throw error;
   }
 };
 
-const notifyUsersByRole = async (role, title, type = 'info', ecoId = null) => {
-  try {
-    const users = await User.find({ role });
-    const notifications = [];
-
-    for (const user of users) {
-      const notification = await createNotification({
-        userId: user._id,
-        title,
-        type,
-        ecoId
-      });
-      notifications.push(notification);
-    }
-
-    return notifications;
-  } catch (error) {
-    throw error;
-  }
-};
-
 const notifyApprovers = async (eco) => {
-  return notifyUsersByRole(
-    'Approver',
-    `ECO "${eco.title}" is ready for your approval`,
-    'approval',
-    eco._id
-  );
+  return createNotification({
+    title: `ECO "${eco.title}" (${eco.ecoNumber}) is ready for your approval`,
+    type: 'approval',
+    ecoId: eco.id
+  });
 };
 
 const notifyRejection = async (eco, rejectedBy, comment) => {
-  if (!eco.createdBy) return null;
-
   return createNotification({
-    userId: eco.createdBy,
     title: `ECO "${eco.title}" was rejected by ${rejectedBy}: ${comment}`,
     type: 'review',
-    ecoId: eco._id
+    ecoId: eco.id
   });
 };
 
 module.exports = {
   createNotification,
-  notifyUsersByRole,
   notifyApprovers,
   notifyRejection
 };
+
