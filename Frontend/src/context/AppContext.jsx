@@ -5,6 +5,7 @@ const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(users[0]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [products] = useState(initialProducts);
   const [bomList, setBomList] = useState(initialBoms);
   const [ecoList, setEcoList] = useState(initialEcos);
@@ -13,6 +14,15 @@ export function AppProvider({ children }) {
   const switchRole = useCallback((userId) => {
     const user = users.find(u => u.id === userId);
     if (user) setCurrentUser(user);
+  }, []);
+
+  const login = useCallback((userId) => {
+    switchRole(userId);
+    setIsAuthenticated(true);
+  }, [switchRole]);
+
+  const logout = useCallback(() => {
+    setIsAuthenticated(false);
   }, []);
 
   const canCreateEco = currentUser.role === ROLES.ENGINEERING || currentUser.role === ROLES.ADMIN;
@@ -103,6 +113,9 @@ export function AppProvider({ children }) {
   }, []);
 
   const value = {
+    isAuthenticated,
+    login,
+    logout,
     currentUser,
     users,
     switchRole,

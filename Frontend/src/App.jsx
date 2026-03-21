@@ -5,6 +5,7 @@ import Sidebar from './components/layout/Sidebar';
 import Topbar from './components/layout/Topbar';
 import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
+import Login from './pages/Login';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import BillOfMaterials from './pages/BillOfMaterials';
@@ -18,6 +19,7 @@ import Settings from './pages/Settings';
 import UserManagement from './pages/UserManagement';
 import EcoStages from './pages/EcoStages';
 import ApprovalRules from './pages/ApprovalRules';
+import { useApp } from './context/AppContext';
 import { AnimatePresence, motion } from 'framer-motion';
 
 function AnimatedRoutes() {
@@ -33,7 +35,6 @@ function AnimatedRoutes() {
         transition={{ duration: 0.2 }}
       >
         <Routes location={location}>
-          <Route path="/" element={<LandingPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<ProductDetail />} />
@@ -55,12 +56,28 @@ function AnimatedRoutes() {
 }
 
 function AppLayout() {
+  const { isAuthenticated } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
-  if (location.pathname === '/' || location.pathname === '/login') {
-    return <AnimatedRoutes />;
+  // Landing page — always public, no sidebar/topbar
+  if (location.pathname === '/') {
+    return <LandingPage />;
+  }
+
+  // Login page — public, no sidebar/topbar
+  if (location.pathname === '/login') {
+    return <Login />;
+  }
+
+  // All other routes require authentication
+  if (!isAuthenticated) {
+    return (
+      <Routes>
+        <Route path="*" element={<Login />} />
+      </Routes>
+    );
   }
 
   return (
