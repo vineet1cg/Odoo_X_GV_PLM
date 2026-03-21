@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 export function generateECOPdf(eco, generatedBy) {
   const doc = new jsPDF('p', 'mm', 'a4');
@@ -89,7 +89,7 @@ export function generateECOPdf(eco, generatedBy) {
   doc.text('ECO Details', margin, y);
   y += 6;
   
-  doc.autoTable({
+  autoTable(doc, {
     startY: y,
     margin: { left: margin, right: margin },
     head: [],
@@ -197,7 +197,7 @@ export function generateECOPdf(eco, generatedBy) {
   
   // Changes table
   if (changes.length > 0) {
-    doc.autoTable({
+    autoTable(doc, {
       startY: y,
       margin: { left: margin, right: margin },
       head: [['Field / Component', 'Old Value', 'New Value', 'Change Type']],
@@ -266,7 +266,7 @@ export function generateECOPdf(eco, generatedBy) {
   
   const approvalLogs = eco.approvalLogs || [];
   if (approvalLogs.length > 0) {
-    doc.autoTable({
+    autoTable(doc, {
       startY: y,
       margin: { left: margin, right: margin },
       head: [['Action', 'By', 'Date & Time', 'Comment']],

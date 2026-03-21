@@ -42,7 +42,10 @@ const bomSchema = new mongoose.Schema({
     default: 'Active'
   },
   components: [componentSchema],
-  operations: [operationSchema]
+  operations: [operationSchema],
+  // Sync fields
+  syncVersion: { type: Number, default: 1 },
+  deletedAt:   { type: Date, default: null },
 }, {
   _id: false,
   timestamps: false,

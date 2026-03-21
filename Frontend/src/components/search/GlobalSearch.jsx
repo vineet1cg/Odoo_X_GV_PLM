@@ -45,7 +45,7 @@ export default function GlobalSearch({ open, setOpen }) {
       try {
         const token = localStorage.getItem('token');
         const res = await fetch(
-          `http://localhost:3000/api/search?q=${encodeURIComponent(debouncedQuery)}`,
+          `http://localhost:5000/api/search?q=${encodeURIComponent(debouncedQuery)}`,
           { headers: { 'Authorization': `Bearer ${token}` } }
         );
         const data = await res.json();

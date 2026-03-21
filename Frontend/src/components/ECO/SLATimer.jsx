@@ -28,10 +28,13 @@ export default function SLATimer({
       // Update string
       const h = Math.floor(ms / 3600000);
       const m = Math.floor((ms % 3600000) / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      
       let newTimeHuman = '';
-      if (h > 48) newTimeHuman = `${Math.floor(h/24)}d ${h%24}h`;
-      else if (h > 0) newTimeHuman = `${h}h ${m}m`;
-      else newTimeHuman = `${m}m`;
+      if (h >= 48) newTimeHuman = `${Math.floor(h/24)}d ${h%24}h`;
+      else if (h > 0) newTimeHuman = `${h}h ${m}m ${s}s`;
+      else if (m > 0) newTimeHuman = `${m}m ${s}s`;
+      else newTimeHuman = `${s}s`;
       
       setTimeHuman(newTimeHuman);
 
@@ -46,7 +49,7 @@ export default function SLATimer({
     };
 
     updateTimer();
-    const intervalId = setInterval(updateTimer, 60000); // UI updates every minute
+    const intervalId = setInterval(updateTimer, 1000); // UI updates every second
 
     return () => clearInterval(intervalId);
   }, [enteredAt, escalateThreshold, warnThreshold, stage]);

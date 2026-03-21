@@ -59,16 +59,35 @@ router.post('/', authMiddleware, roleMiddleware(['Admin']), async (req, res) => 
   try {
     const { name, email, role, status } = req.body;
     const avatar = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U';
+    
+    // Generate secure temporary password
+    const digits = Math.floor(1000 + Math.random() * 9000);
+    const tempPassword = `PLM${digits}!`;
+
     const newUser = await User.create({
       id: `u${Date.now()}`,
       name,
       email,
-      password: 'password123',
+      // Pass plaintext so User.js pre('save') hook hashes it correctly
+      password: tempPassword,
       role,
       avatar,
       status: status || 'Active'
     });
-    res.status(201).json({ success: true, data: newUser });
+    
+    // Exclude database properties but return tempPassword ONCE
+    res.status(201).json({ 
+      success: true, 
+      data: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        avatar: newUser.avatar,
+        status: newUser.status
+      },
+      tempPassword 
+    });
   } catch (error) {
     if (error.code === 11000) {
       return res.status(400).json({ success: false, message: 'Email already exists' });

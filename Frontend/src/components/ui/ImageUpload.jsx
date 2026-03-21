@@ -12,29 +12,34 @@ export default function ImageUpload({ images = [], onImagesChange, disabled = fa
 
   const simulateUpload = useCallback((file) => {
     return new Promise((resolve) => {
-      const id = `img_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 30 + 10;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-          setUploadProgress(prev => { const next = { ...prev }; delete next[id]; return next; });
-          resolve({
-            id,
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            url: URL.createObjectURL(file),
-            uploadedAt: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-            status: 'pending',
-            category: file.name.toLowerCase().includes('bom') ? 'BoM Diagram' :
-                      file.name.toLowerCase().includes('sketch') ? 'Design Sketch' :
-                      file.name.toLowerCase().includes('doc') ? 'Document' : 'Product Image',
-          });
-        }
-        setUploadProgress(prev => ({ ...prev, [id]: Math.min(progress, 100) }));
-      }, 150);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Url = reader.result;
+        const id = `img_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 30 + 10;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            setUploadProgress(prev => { const next = { ...prev }; delete next[id]; return next; });
+            resolve({
+              id,
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              url: base64Url,
+              uploadedAt: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+              status: 'pending',
+              category: file.name.toLowerCase().includes('bom') ? 'BoM Diagram' :
+                        file.name.toLowerCase().includes('sketch') ? 'Design Sketch' :
+                        file.name.toLowerCase().includes('doc') ? 'Document' : 'Product Image',
+            });
+          }
+          setUploadProgress(prev => ({ ...prev, [id]: Math.min(progress, 100) }));
+        }, 150);
+      };
+      reader.readAsDataURL(file);
     });
   }, []);
 

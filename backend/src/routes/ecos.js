@@ -1,6 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const ECO = require('../models/ECO');
+const Notification = require('../models/Notification');
 const authMiddleware = require('../middleware/auth');
 const roleMiddleware = require('../middleware/roles');
 
@@ -147,8 +148,8 @@ router.patch('/:id/stage', authMiddleware, roleMiddleware(['Admin', 'Engineering
     const currentStage = eco.stage;
 
     const validTransitions = {
-      'New': ['In Review', 'Approval'],
-      'In Review': ['Approval'],
+      'New': ['In Review', 'Approval', 'Done'],
+      'In Review': ['Approval', 'Done', 'New'],
       'Approval': ['Done', 'New'] // New represents 'Rejected' status in the frontend currently
     };
 
@@ -195,6 +196,18 @@ router.patch('/:id/stage', authMiddleware, roleMiddleware(['Admin', 'Engineering
     eco.slaEscalated = false;
     await eco.save();
 
+    // Auto-create notification
+    try {
+      await Notification.create({
+        _id: `n${Date.now()}`,
+        title: `${eco.ecoNumber} ${action.toLowerCase()} by ${req.user.name}`,
+        type: stage === 'Done' ? 'approval' : stage === 'Approval' ? 'review' : 'info',
+        ecoId: eco._id,
+        read: false,
+        timestamp: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+      });
+    } catch (notifErr) { /* best effort */ }
+
     res.json({ success: true, data: eco });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to update ECO stage' });
@@ -230,6 +243,18 @@ router.post('/:id/reject', authMiddleware, roleMiddleware(['Admin', 'Approver'])
 
     eco.stage = 'New';
     await eco.save();
+
+    // Auto-create rejection notification
+    try {
+      await Notification.create({
+        _id: `n${Date.now()}`,
+        title: `${eco.ecoNumber} rejected by ${req.user.name}`,
+        type: 'info',
+        ecoId: eco._id,
+        read: false,
+        timestamp: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+      });
+    } catch (notifErr) { /* best effort */ }
 
     res.json({ success: true, data: eco });
   } catch (error) {

@@ -121,7 +121,10 @@ const ecoSchema = new mongoose.Schema({
   imageChanges: [imageChangeSchema],
   approvalLogs: [approvalLogSchema],
   stageEnteredAt: { type: Date, default: Date.now },
-  slaEscalated: { type: Boolean, default: false }
+  slaEscalated: { type: Boolean, default: false },
+  // Sync fields
+  version:   { type: Number, default: 1 },
+  deletedAt: { type: Date, default: null },
 }, {
   _id: false,
   timestamps: false,

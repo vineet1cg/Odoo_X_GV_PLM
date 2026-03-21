@@ -14,7 +14,7 @@ export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
-        const res = await fetch(`http://localhost:3000/api/ecos/${ecoId}/impact`, {
+        const res = await fetch(`http://localhost:5000/api/ecos/${ecoId}/impact`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -229,26 +229,7 @@ export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
         </div>
       </div>
       
-      {/* Action Buttons passed from parent */}
-      <div className="mt-8 pt-6 border-t border-slate-200">
-        <h3 className="text-sm font-bold text-slate-700 mb-4 text-center tracking-wide uppercase">Proceed with authorization</h3>
-        <div className="flex flex-col sm:flex-row gap-4 w-full">
-          <button
-            onClick={onApprove}
-            className="flex-1 flex flex-col items-center justify-center gap-2 py-4 bg-teal-50 text-teal-700 hover:bg-teal-600 hover:text-white border-2 border-teal-200 hover:border-teal-600 rounded-xl transition-all shadow-sm group"
-          >
-            <CheckCircle size={24} className="group-hover:scale-110 transition-transform" />
-            <span className="text-base font-bold">Approve Request</span>
-          </button>
-          <button
-            onClick={onReject}
-            className="flex-1 flex flex-col items-center justify-center gap-2 py-4 bg-red-50 text-red-700 hover:bg-red-600 hover:text-white border-2 border-red-200 hover:border-red-600 rounded-xl transition-all shadow-sm group"
-          >
-            <AlertTriangle size={24} className="group-hover:scale-110 transition-transform" />
-            <span className="text-base font-bold">Reject & Revise</span>
-          </button>
-        </div>
-      </div>
+
 
     </motion.div>
   );

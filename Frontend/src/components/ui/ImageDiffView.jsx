@@ -79,11 +79,11 @@ export default function ImageDiffView({ imageChanges = [], canReview = false, on
                 {change.oldImage ? (
                   <div
                     onClick={() => onPreviewImage && onPreviewImage([change.oldImage], 0)}
-                    className={`relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer group border-2 ${
+                    className={`relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer group border-2 flex items-center justify-center ${
                       change.changeType === 'removed' ? 'ring-2 ' + borderColors.removed : 'border-surface-200'
                     }`}
                   >
-                    <img src={change.oldImage.url} alt="Current" className="w-full h-full object-cover" loading="lazy" />
+                    <img src={change.oldImage.url} alt="Current" className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = '/logo.svg'; e.target.className = 'w-1/2 h-1/2 object-contain opacity-20'; }} loading="lazy" />
                     {change.changeType === 'removed' && (
                       <div className="absolute inset-0 bg-danger-500/20 flex items-center justify-center">
                         <span className="px-3 py-1.5 bg-danger-600 text-white text-xs font-bold rounded-full">TO BE REMOVED</span>
@@ -106,11 +106,11 @@ export default function ImageDiffView({ imageChanges = [], canReview = false, on
                 {change.newImage ? (
                   <div
                     onClick={() => onPreviewImage && onPreviewImage([change.newImage], 0)}
-                    className={`relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer group border-2 ring-2 ${
+                    className={`relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer group border-2 ring-2 flex items-center justify-center ${
                       borderColors[change.changeType] || borderColors.pending
                     }`}
                   >
-                    <img src={change.newImage.url} alt="Proposed" className="w-full h-full object-cover" loading="lazy" />
+                    <img src={change.newImage.url} alt="Proposed" className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = '/logo.svg'; e.target.className = 'w-1/2 h-1/2 object-contain opacity-20'; }} loading="lazy" />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                       <Eye size={24} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>

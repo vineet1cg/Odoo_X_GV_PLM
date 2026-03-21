@@ -1,37 +1,18 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Eye, EyeOff, Component, CheckCircle, Package, Hexagon } from 'lucide-react';
+import { Eye, EyeOff, Component, CheckCircle, Package, Hexagon, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Login() {
   const { login, users } = useApp();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   
   const engineeringUserId = users.find(u => u.name.includes('Rishi'))?.id || users[0].id;
   const [selectedRole, setSelectedRole] = useState(engineeringUserId);
   
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError('Email and password are required');
-      return;
-    }
-    setError('');
-    setLoading(true);
-    try {
-      const result = await login(email, password);
-      if (result?.error) {
-        setError(result.error);
-      }
-    } catch (err) {
-      setError('Login failed. Check your credentials.');
-    } finally {
-      setLoading(false);
-    }
+    login(selectedRole);
   };
 
   // Use real users from mock data for floating avatars
@@ -72,16 +53,6 @@ export default function Login() {
   const config = roleConfigs[selectedRole] || roleConfigs.u1;
   const selectedUser = users.find(u => u.id === selectedRole);
 
-  const handleQuickLoginClick = async (user) => {
-    setSelectedRole(user.id);
-    setEmail(user.email);
-    setPassword('password123');
-    setError('');
-    
-    // Optionally trigger immediate login (commented out to allow them to click sign in as requested in earlier prompt)
-    // If they want true '1-click' dynamic login without pressing sign in, uncomment this 
-  };
-
   return (
     <div className="min-h-screen w-full flex bg-[#FCFAF8] font-sans text-surface-900 overflow-hidden">
       
@@ -96,7 +67,7 @@ export default function Login() {
           {/* Logo */}
           <div className="flex items-center gap-3 mb-10">
             <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
-              <img src="/logo.svg" alt="PLM Logo" className="w-full h-full object-contain" loading="lazy" />
+              <img src="/logo.svg" alt="PLM Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col justify-center">
               <span className="text-[20px] leading-none font-extrabold text-primary-900 tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -116,22 +87,15 @@ export default function Login() {
             Sign in to manage your engineering change orders and product lifecycle.
           </p>
 
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm font-medium">
-              {error}
-            </div>
-          )}
-
           {/* Form */}
           <form onSubmit={handleLogin} className="space-y-3">
             <div>
               <input
-                type="email"
-                placeholder="Email address"
+                type="text"
+                placeholder="Username"
                 className="w-full px-5 py-[14px] rounded-2xl border border-surface-200 bg-white focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all placeholder:text-surface-400 font-medium text-[15px]"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={selectedUser?.name || ''}
+                readOnly
               />
             </div>
             <div className="relative">
@@ -139,8 +103,8 @@ export default function Login() {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
                 className="w-full px-5 py-[14px] rounded-2xl border border-surface-200 bg-white focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all placeholder:text-surface-400 font-medium text-[15px] tracking-widest"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value="••••••••••••"
+                readOnly
               />
               <button
                 type="button"
@@ -159,43 +123,39 @@ export default function Login() {
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-[15px] bg-primary-900 text-white rounded-2xl font-bold text-[15px] hover:bg-primary-800 active:scale-[0.99] transition-all shadow-lg shadow-primary-900/20 mt-1 disabled:opacity-60"
+              className="w-full py-[15px] bg-primary-900 text-white rounded-2xl font-bold text-[15px] hover:bg-primary-800 active:scale-[0.99] transition-all shadow-lg shadow-primary-900/20 mt-1"
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              Sign in as {selectedUser?.name.split(' ')[0]}
             </button>
           </form>
 
-          {/* Mobile-only Quick Login (Hidden on Desktop) */}
-          <div className="mt-8 lg:hidden block">
-            <div className="flex items-center gap-4 mb-5">
-              <div className="flex-1 h-px bg-surface-200" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-surface-400">Demo Accounts</span>
-              <div className="flex-1 h-px bg-surface-200" />
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-2">
-              {users.map(user => {
-                const isActive = selectedRole === user.id;
-                return (
-                  <button
-                    key={'mobile-' + user.id}
-                    type="button"
-                    onClick={() => handleQuickLoginClick(user)}
-                    className={`px-3 py-1.5 rounded-full border text-[11px] font-semibold flex items-center gap-1.5 transition-all duration-200 ${
-                      isActive
-                        ? 'bg-[#E5D5C5] border-[#d1bfab] text-[#1b3b64] shadow-sm'
-                        : 'bg-[#F4EBE1] border-[#EADBC8] text-[#1b3b64]'
-                    }`}
-                  >
-                    {user.role}
-                  </button>
-                );
-              })}
-            </div>
+          {/* Social Login */}
+          <div className="mt-8 flex items-center gap-4">
+            <div className="flex-1 h-px bg-surface-200" />
+            <span className="text-[13px] font-medium text-surface-400 whitespace-nowrap">or continue with</span>
+            <div className="flex-1 h-px bg-surface-200" />
           </div>
 
-
+          <div className="mt-6 flex justify-center gap-4">
+            {/* Google */}
+            <button className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center hover:scale-105 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-surface-900">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+              </svg>
+            </button>
+            {/* Apple */}
+            <button className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center hover:scale-105 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-surface-900">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                <path d="M17.05 15.651c-.05 2.522 2.126 3.385 2.148 3.396-.021.056-.342 1.171-1.125 2.308-.71.103-1.45.197-2.25-.015-1.155-.316-2.05-.337-3.23-.337-1.181 0-2.18.064-3.14.379-.81.258-1.55.152-2.17.01-1.19-1.602-2.54-4.81-2.54-8.083 0-3.8 2.39-5.833 4.67-5.833 1.14 0 2.19.742 2.86.742.67 0 1.93-.896 3.29-.896 1.38.031 2.65.59 3.56 1.487-2.102 1.25-1.92 4.103.118 5.613-.105.289-.208.7-.3.949zm-3.32-10.463c.64-.783 1.07-1.874.96-2.956-1.04.043-2.19.689-2.85 1.488-.58.69-1.08 1.83-.93 2.887 1.15.088 2.21-.617 2.82-1.42z"/>
+              </svg>
+            </button>
+            {/* Facebook */}
+            <button className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center hover:scale-105 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-surface-900">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/>
+              </svg>
+            </button>
+          </div>
 
           {/* Footer */}
           <p className="mt-8 text-center text-[13px] font-medium text-surface-400">
@@ -337,7 +297,7 @@ export default function Login() {
                 return (
                   <button
                     key={user.id}
-                    onClick={() => handleQuickLoginClick(user)}
+                    onClick={() => setSelectedRole(user.id)}
                     className={`px-5 py-2.5 rounded-full border text-[13px] font-semibold flex items-center gap-2.5 transition-all duration-200 ${
                       isActive
                         ? 'bg-[#E5D5C5] border-[#d1bfab] text-[#1b3b64] shadow-md scale-[1.04] ring-2 ring-[#d9c4aa]/60'

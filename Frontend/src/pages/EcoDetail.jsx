@@ -32,7 +32,7 @@ export default function EcoDetail() {
     const fetchSla = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:3000/api/ecos/sla/status', {
+        const res = await fetch('http://localhost:5000/api/ecos/sla/status', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const json = await res.json();
@@ -105,9 +105,9 @@ export default function EcoDetail() {
 
       {/* ECO Header */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-surface-100 rounded-xl border border-surface-200 p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
+        <div className="flex flex-col md:flex-row items-start justify-between gap-4 md:gap-6 mb-4">
+          <div className="w-full">
+            <div className="flex items-center flex-wrap gap-2 mb-2">
               <span className="text-sm font-mono text-surface-400">{eco.ecoNumber}</span>
               <StatusBadge status={eco.type} />
               <StatusBadge status={eco.priority} />
@@ -117,9 +117,9 @@ export default function EcoDetail() {
                 </span>
               )}
             </div>
-            <h1 className="text-2xl font-bold text-surface-800">{eco.title}</h1>
+            <h1 className="text-2xl font-bold text-surface-800 break-words">{eco.title}</h1>
           </div>
-          <div className="flex flex-col items-end gap-3">
+          <div className="flex flex-row md:flex-col items-center md:items-end gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
             <StatusBadge status={eco.stage} size="lg" />
             <ExportPDFButton eco={eco} />
           </div>
@@ -220,9 +220,9 @@ export default function EcoDetail() {
               <div
                 key={img.id}
                 onClick={() => handlePreviewImage(attachedImages, idx)}
-                className="group relative aspect-square bg-surface-50 rounded-xl border border-surface-200 overflow-hidden cursor-pointer hover:border-primary-300 transition-colors"
+                className="group relative aspect-square bg-surface-50 rounded-xl border border-surface-200 overflow-hidden cursor-pointer hover:border-primary-300 transition-colors flex items-center justify-center"
               >
-                <img src={img.url} alt={img.name} className="w-full h-full object-cover" loading="lazy" />
+                <img src={img.url} alt={img.name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = '/logo.svg'; e.target.className = 'w-1/2 h-1/2 object-contain opacity-20'; }} loading="lazy" />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                   <span className="text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Preview</span>
                 </div>
@@ -259,7 +259,7 @@ export default function EcoDetail() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="space-y-4">
             {/* Submit for Approval (Engineering/Admin, stage is New or In Review) */}
             {canEditDraft && (eco.stage === 'New' || eco.stage === 'In Review') && (
               <button
@@ -270,14 +270,32 @@ export default function EcoDetail() {
               </button>
             )}
 
-            {/* Approve / Reject (Approver/Admin, stage is Approval) */}
-            {canApprove && eco.stage === 'Approval' && (
+            {/* Impact Predictor (Approver/Admin, stage is active) */}
+            {canApprove && !['Done', 'Rejected'].includes(eco.stage) && (
               <ImpactPredictor
                 ecoId={eco.id}
                 eco={eco}
                 onApprove={() => setShowConfirm('approve')}
                 onReject={() => setShowConfirm('reject')}
               />
+            )}
+
+            {/* Standalone Approve / Reject Buttons — always visible for approvers */}
+            {canApprove && !['Done', 'Rejected'].includes(eco.stage) && (
+              <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-surface-200">
+                <button
+                  onClick={() => setShowConfirm('approve')}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
+                >
+                  <CheckCircle size={18} /> Approve ECO
+                </button>
+                <button
+                  onClick={() => setShowConfirm('reject')}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-colors shadow-sm"
+                >
+                  <XCircle size={18} /> Reject ECO
+                </button>
+              </div>
             )}
 
             {/* No action available info */}

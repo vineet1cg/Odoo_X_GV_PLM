@@ -9,7 +9,7 @@ export default function ExportPDFButton({ eco }) {
   const handleExport = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/ecos/${eco.id}/export/pdf`, {
+      const res = await fetch(`http://localhost:5000/api/ecos/${eco.id}/export/pdf`, {
         headers: { 
           'Authorization': `Bearer ${localStorage.getItem('token')}` 
         }

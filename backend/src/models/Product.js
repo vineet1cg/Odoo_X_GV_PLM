@@ -68,7 +68,10 @@ const productSchema = new mongoose.Schema({
   bomId: {
     type: String,
     default: null
-  }
+  },
+  // Sync fields
+  syncVersion: { type: Number, default: 1 },
+  deletedAt:   { type: Date, default: null },
 }, {
   _id: false,
   timestamps: false,

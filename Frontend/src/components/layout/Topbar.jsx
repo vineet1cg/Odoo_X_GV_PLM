@@ -1,22 +1,20 @@
 // ============================================================//
-//  Topbar.jsx — HEADER: Search + Notifications + Role Switch  //
+//  Topbar.jsx — HEADER: Search + Notifications + User Info    //
 //  Bell icon with unread count badge                          //
-//  Avatar dropdown to switch roles (demo feature)             //
+//  User info with Logout button                               //
 // ============================================================//
 import { useState, useRef, useEffect } from 'react';
-import { Bell, Search, ChevronDown, Check, Menu } from 'lucide-react';
+import { Bell, Search, Menu, LogOut } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { users } from '../../data/mockData';
 import GlobalSearch from '../search/GlobalSearch';
+import DBStatusBadge from '../admin/DBStatusBadge';
 
 export default function Topbar({ setMobileMenuOpen }) {
-  const { currentUser, switchRole, notificationList, markNotificationRead } = useApp();
+  const { currentUser, logout, notificationList, markNotificationRead } = useApp();
   const [showNotif, setShowNotif] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const notifRef = useRef(null);
-  const userRef = useRef(null);
   const navigate = useNavigate();
 
   const unreadCount = notificationList.filter(n => !n.read).length;
@@ -24,7 +22,6 @@ export default function Topbar({ setMobileMenuOpen }) {
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (notifRef.current && !notifRef.current.contains(e.target)) setShowNotif(false);
-      if (userRef.current && !userRef.current.contains(e.target)) setShowUserMenu(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -35,6 +32,11 @@ export default function Topbar({ setMobileMenuOpen }) {
     'Approver': 'bg-amber-100 text-amber-700',
     'Operations User': 'bg-green-100 text-green-700',
     'Admin': 'bg-purple-100 text-purple-700',
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -49,20 +51,20 @@ export default function Topbar({ setMobileMenuOpen }) {
         </button>
 
         {/* Search */}
-        <div className={`relative flex-1 block`}>
+        <div className="relative flex-1 hidden sm:block">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-400" />
           <button
             onClick={() => setShowGlobalSearch(true)}
             className="w-full text-left pl-10 pr-4 py-2 rounded-lg border border-surface-200 bg-surface-50 text-sm text-surface-400 focus:outline-none hover:border-primary-300 hover:bg-white transition-all flex justify-between items-center"
           >
-            <span>Search ECOs, Products, BoMs...</span>
+            <span className="truncate">Search ECOs, Products, BoMs...</span>
             <kbd className="hidden sm:inline-block text-[10px] font-mono bg-white border border-slate-200 rounded px-1.5 py-0.5 shadow-sm text-slate-400">⌘K</kbd>
           </button>
         </div>
       </div>
 
       {/* Right side */}
-      <div className={`flex items-center gap-2 sm:gap-4 ml-4 flex`}>
+      <div className="flex items-center gap-2 sm:gap-4 ml-4">
         
         {/* Mobile Search Toggle */}
         <button
@@ -71,11 +73,11 @@ export default function Topbar({ setMobileMenuOpen }) {
         >
           <Search size={20} />
         </button>
+
+        {/* DB Status Badge */}
+        <DBStatusBadge />
+
         {/* Notifications */}
-        {/* ======================================== */}
-        {/* NOTIFICATIONS — Bell icon + dropdown      */}
-        {/* Shows unread count badge                   */}
-        {/* ======================================== */}
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setShowNotif(!showNotif)}
@@ -96,6 +98,9 @@ export default function Topbar({ setMobileMenuOpen }) {
                 {unreadCount > 0 && <span className="text-xs text-primary-600 font-medium">{unreadCount} new</span>}
               </div>
               <div className="max-h-72 overflow-y-auto">
+                {notificationList.length === 0 && (
+                  <p className="px-4 py-6 text-sm text-surface-400 text-center">No notifications yet</p>
+                )}
                 {notificationList.map(n => (
                   <button
                     key={n.id}
@@ -120,53 +125,24 @@ export default function Topbar({ setMobileMenuOpen }) {
           )}
         </div>
 
-        {/* User / Role Switcher */}
-        {/* ======================================== */}
-        {/* ROLE SWITCHER — Click to change user      */}
-        {/* Shows all 4 demo users to swap between    */}
-        {/* ======================================== */}
-        <div className="relative" ref={userRef}>
+        {/* User Info + Logout */}
+        <div className="flex items-center gap-3 pl-3 border-l border-surface-200">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+            <span className="text-white text-xs font-bold">{currentUser.avatar}</span>
+          </div>
+          <div className="text-left hidden sm:block">
+            <p className="text-sm font-medium text-surface-800 leading-tight">{currentUser.name}</p>
+            <span className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded-full mt-0.5 ${roleColors[currentUser.role]}`}>
+              {currentUser.role}
+            </span>
+          </div>
           <button
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-3 px-3 py-1.5 rounded-lg hover:bg-surface-50 transition-colors"
+            onClick={handleLogout}
+            className="p-2 rounded-lg text-surface-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+            title="Logout"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
-              <span className="text-white text-xs font-bold">{currentUser.avatar}</span>
-            </div>
-            <div className="text-left hidden sm:block">
-              <p className="text-sm font-medium text-surface-800 leading-tight">{currentUser.name}</p>
-              <span className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded-full mt-0.5 ${roleColors[currentUser.role]}`}>
-                {currentUser.role}
-              </span>
-            </div>
-            <ChevronDown size={14} className="text-surface-400" />
+            <LogOut size={18} />
           </button>
-
-          {showUserMenu && (
-            <div className="absolute right-0 top-14 w-64 bg-surface-100 rounded-xl shadow-xl border border-surface-200 overflow-hidden animate-fade-in">
-              <div className="px-4 py-3 border-b border-surface-100">
-                <p className="text-xs font-semibold text-surface-400 uppercase tracking-wider">Switch Role (Demo)</p>
-              </div>
-              {users.map(user => (
-                <button
-                  key={user.id}
-                  onClick={() => { switchRole(user.id); setShowUserMenu(false); }}
-                  className={`w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-surface-50 transition-colors ${currentUser.id === user.id ? 'bg-primary-50/50' : ''}`}
-                >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-xs font-bold">{user.avatar}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-surface-800">{user.name}</p>
-                    <span className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${roleColors[user.role]}`}>
-                      {user.role}
-                    </span>
-                  </div>
-                  {currentUser.id === user.id && <Check size={16} className="text-primary-600" />}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 

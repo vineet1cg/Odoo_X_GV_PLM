@@ -62,31 +62,36 @@ export function AppProvider({ children }) {
   // ==========================================//
   //  LOGIN / LOGOUT — Auth state              //
   // ==========================================//
-  const login = useCallback(async (userId) => {
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
+  const login = useCallback(async (email, password) => {
     try {
       const res = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, password: 'password123' })
+        body: JSON.stringify({ email, password })
       });
       const data = await res.json();
       if (data.success) {
         localStorage.setItem('token', data.data.token);
-        switchRole(userId);
+        const apiUser = data.data.user;
+        // Use the real user data from the API (role comes from DB)
+        setCurrentUser({
+          id: apiUser.id,
+          name: apiUser.name,
+          email: apiUser.email,
+          role: apiUser.role,
+          avatar: apiUser.avatar || apiUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+        });
         setIsAuthenticated(true);
         fetchAllData(data.data.token);
+        return { success: true };
       } else {
-        alert('Login failed: ' + data.message);
+        return { error: data.message || 'Invalid credentials' };
       }
     } catch (err) {
       console.error(err);
-      // Fallback to offline mode for now if server is down
-      switchRole(userId);
-      setIsAuthenticated(true);
+      return { error: 'Server unavailable. Please try again.' };
     }
-  }, [switchRole, fetchAllData]);
+  }, [fetchAllData]);
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');
@@ -110,14 +115,13 @@ export function AppProvider({ children }) {
       .then(res => res.json())
       .then(data => {
         if (data.success && data.data) {
-          const matchedUser = users.find(u => u.email === data.data.email) || {
+          setCurrentUser({
             id: data.data.id,
             name: data.data.name,
             email: data.data.email,
             role: data.data.role,
-            avatar: data.data.avatar
-          };
-          setCurrentUser(matchedUser);
+            avatar: data.data.avatar || data.data.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+          });
           setIsAuthenticated(true);
           fetchAllData(token);
         } else {
@@ -125,11 +129,43 @@ export function AppProvider({ children }) {
         }
       })
       .catch(() => {
-        // Token invalid or server down — stay on mock data
         localStorage.removeItem('token');
       })
       .finally(() => setIsLoading(false));
   }, [fetchAllData]);
+
+  // ==========================================//
+  //  LIVE UPDATES — Poll every 30s            //
+  // ==========================================//
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const pollData = async () => {
+      try {
+        const headers = { 'Authorization': `Bearer ${token}` };
+        const apiBase = 'http://localhost:5000/api';
+
+        const [notifRes, ecoRes] = await Promise.all([
+          fetch(`${apiBase}/notifications`, { headers }),
+          fetch(`${apiBase}/ecos`, { headers }),
+        ]);
+
+        if (notifRes.ok) {
+          const notifData = await notifRes.json();
+          if (notifData.data) setNotificationList(notifData.data);
+        }
+        if (ecoRes.ok) {
+          const ecoData = await ecoRes.json();
+          if (ecoData.data) setEcoList(ecoData.data);
+        }
+      } catch {}
+    };
+
+    const interval = setInterval(pollData, 30000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   // ===========================================//
   //  PERMISSION FLAGS — Role-based access      //

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, UserPlus, Shield, Mail, Filter, CheckCircle, X, Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { ROLES } from '../data/mockData';
+import { sendWelcomeEmail } from '../services/emailService';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function UserManagement() {
@@ -92,6 +93,14 @@ export default function UserManagement() {
       const data = await res.json();
       if (data.success) {
         showToast(editingUser ? 'User updated successfully' : 'New user added successfully');
+        
+        if (!editingUser && data.tempPassword && data.data) {
+          // Non-blocking EmailJS dispatch
+          sendWelcomeEmail(data.data, data.tempPassword)
+            .then(() => console.log('✅ Welcome email dispatched via EmailJS'))
+            .catch(err => console.error('❌ Failed to dispatch welcome email:', err));
+        }
+
         setRefreshTrigger(prev => prev + 1);
         setIsModalOpen(false);
       } else {

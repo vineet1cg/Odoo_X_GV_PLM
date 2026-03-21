@@ -1,10 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const connectDB = require('./src/config/db');
 
 dotenv.config();
 
+// ── DB Layer ──────────────────────────────────────
+const { initDatabases, stopHealthMonitor } = require('./src/config/database');
+const dbMiddleware = require('./src/middleware/dbMiddleware');
+
+// ── Route imports ─────────────────────────────────
 const authRoutes = require('./src/routes/auth');
 const productRoutes = require('./src/routes/products');
 const bomRoutes = require('./src/routes/boms');
@@ -19,10 +23,12 @@ const impactRouter = require('./src/routes/impact');
 const slaRouter = require('./src/routes/sla');
 const exportRouter = require('./src/routes/export');
 const searchRouter = require('./src/routes/search');
+const dbStatusRoute = require('./src/routes/dbStatus');
 const { startSLAMonitor } = require('./src/services/slaService');
 
 const app = express();
 
+// ── Middleware ─────────────────────────────────────
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174'],
   credentials: true,
@@ -32,12 +38,14 @@ app.use(cors({
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(dbMiddleware);
 
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   next();
 });
 
+// ── Routes ────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/boms', bomRoutes);
@@ -46,6 +54,7 @@ app.use('/api/ecos', impactRouter);
 app.use('/api/ecos', slaRouter);
 app.use('/api/ecos', exportRouter);
 app.use('/api', searchRouter);
+app.use('/api/db', dbStatusRoute);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/approval-rules', approvalRuleRoutes);
@@ -70,19 +79,22 @@ app.use((err, req, res, next) => {
   });
 });
 
+// ── Graceful shutdown ─────────────────────────────
+process.on('SIGTERM', () => { stopHealthMonitor(); process.exit(0); });
+process.on('SIGINT',  () => { stopHealthMonitor(); process.exit(0); });
+
 module.exports = app;
 
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
-  
+
   const startServer = async () => {
     try {
-      await connectDB();
+      await initDatabases();
       app.listen(PORT, () => {
-        console.log(`PLM Backend running on http://localhost:${PORT}`);
-        console.log(`CORS enabled for http://localhost:5173`);
-        console.log(`MongoDB connected\n`);
-        console.log('Available API Routes:');
+        console.log(`\n[SERVER] PLM Flow running on http://localhost:${PORT}`);
+        console.log(`[SERVER] CORS enabled for localhost:5173/5174`);
+        console.log(`\nAvailable API Routes:`);
         console.log('  POST   /api/auth/login');
         console.log('  GET    /api/auth/me');
         console.log('  GET    /api/products');
@@ -115,6 +127,8 @@ if (require.main === module) {
         console.log('  PUT    /api/settings/eco-stages');
         console.log('  GET    /api/settings/rules');
         console.log('  PUT    /api/settings/rules');
+        console.log('  GET    /api/db/status');
+        console.log('  GET    /api/search?q=...');
         console.log('  GET    /api/health');
         console.log('');
       });

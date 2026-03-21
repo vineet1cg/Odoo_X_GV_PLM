@@ -33,7 +33,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['Active', 'Inactive'],
     default: 'Active'
-  }
+  },
+  // Sync fields
+  version:   { type: Number, default: 1 },
+  deletedAt: { type: Date, default: null },
 }, {
   _id: false,
   timestamps: true,
