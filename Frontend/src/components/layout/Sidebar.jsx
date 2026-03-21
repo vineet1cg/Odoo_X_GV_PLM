@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, Layers, FileText, BarChart3, Settings, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { LayoutDashboard, Package, Layers, FileText, BarChart3, Settings, ChevronLeft, ChevronRight, X, Hexagon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -59,25 +59,36 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
         `}
       >
       {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-5 border-b border-surface-200">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-sm">P</span>
+      {/* Logo */}
+      <div className="h-16 flex items-center justify-between px-5 border-b border-surface-200 bg-surface-50 relative z-10">
+        <div className="flex items-center gap-3 min-w-0 h-full">
+          <div className="w-9 h-9 flex-shrink-0 bg-primary-900 rounded-xl flex items-center justify-center relative shadow-sm border border-primary-800">
+            {/* Hexagon Outline (Tan/Sand) */}
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute" style={{ color: "var(--color-surface-200)" }}>
+              <path d="M12 2L2 7L2 17L12 22L22 17L22 7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            {/* Inner Gear (Cream) */}
+            <Settings size={12} className="absolute" style={{ color: "var(--color-surface-50)" }} strokeWidth={2.5} />
+            {/* Accent dot (Tan/Sand) */}
+            <div className="absolute top-1.5 right-1.5 w-[5px] h-[5px] rounded-full" style={{ backgroundColor: "var(--color-surface-300)" }} />
           </div>
-            {(!collapsed || mobileMenuOpen) && (
-              <div
-                className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${mobileMenuOpen ? 'w-auto opacity-100' : 'w-0 opacity-0 group-hover:w-auto group-hover:opacity-100 lg:w-auto lg:opacity-100'} ${collapsed ? '!w-0 !opacity-0' : ''}`}
-              >
-                <h1 className="text-lg font-bold text-surface-800 tracking-tight">PLM</h1>
-                <p className="text-[10px] text-surface-400 -mt-1 font-medium tracking-wider uppercase">Change Control</p>
-              </div>
-            )}
+          
+          {(!collapsed || mobileMenuOpen) && (
+            <div className={`flex flex-col justify-center overflow-hidden whitespace-nowrap transition-all duration-300 ${(!collapsed || mobileMenuOpen) ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
+              <h1 className="text-[20px] leading-none font-extrabold text-primary-900 tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
+                PLM
+              </h1>
+              <p className="text-[9px] leading-tight text-surface-500 font-bold tracking-widest uppercase mt-1">
+                Change Control
+              </p>
+            </div>
+          )}
         </div>
         
         {/* Mobile Close Button */}
         <button 
           onClick={() => setMobileMenuOpen(false)}
-          className="sm:hidden p-1.5 -mr-2 text-surface-400 hover:text-surface-600 hover:bg-surface-50 rounded-lg"
+          className="sm:hidden p-1.5 -mr-2 text-surface-400 hover:text-surface-700 hover:bg-surface-200 rounded-lg transition-colors"
         >
           <X size={20} />
         </button>
@@ -94,12 +105,12 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
               to={item.to}
               className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                 isActive
-                  ? 'bg-primary-50 text-primary-700 shadow-sm'
-                  : 'text-surface-500 hover:bg-surface-50 hover:text-surface-800'
+                  ? 'bg-surface-200 text-primary-900 shadow-sm border border-surface-300/50'
+                  : 'text-surface-600 hover:bg-surface-50 hover:text-primary-800'
               }`}
               title={collapsed ? item.label : undefined}
             >
-              <Icon size={20} className={`flex-shrink-0 transition-colors ${isActive ? 'text-primary-600' : 'text-surface-400 group-hover:text-surface-600'}`} />
+              <Icon size={20} className={`flex-shrink-0 transition-colors ${isActive ? 'text-primary-800' : 'text-surface-500 group-hover:text-primary-700'}`} />
               {(!collapsed || mobileMenuOpen) && (
                   <span
                     className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${mobileMenuOpen ? 'w-auto opacity-100' : 'w-0 opacity-0 group-hover:w-auto group-hover:opacity-100 lg:w-auto lg:opacity-100'} ${collapsed ? '!w-0 !opacity-0' : ''}`}
