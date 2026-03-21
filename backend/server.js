@@ -61,55 +61,59 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+module.exports = app;
 
-const startServer = async () => {
-  try {
-    await connectDB();
-    app.listen(PORT, () => {
-      console.log(`PLM Backend running on http://localhost:${PORT}`);
-      console.log(`CORS enabled for http://localhost:5173`);
-      console.log(`MongoDB connected\n`);
-      console.log('Available API Routes:');
-      console.log('  POST   /api/auth/login');
-      console.log('  GET    /api/auth/me');
-      console.log('  GET    /api/products');
-      console.log('  GET    /api/products/:id');
-      console.log('  GET    /api/boms');
-      console.log('  GET    /api/boms/:id');
-      console.log('  POST   /api/boms');
-      console.log('  GET    /api/ecos');
-      console.log('  GET    /api/ecos/:id');
-      console.log('  POST   /api/ecos');
-      console.log('  PATCH  /api/ecos/:id/stage');
-      console.log('  POST   /api/ecos/:id/reject');
-      console.log('  PATCH  /api/ecos/:id/images');
-      console.log('  PATCH  /api/ecos/:id/images/review/:imageChangeId');
-      console.log('  GET    /api/notifications');
-      console.log('  PATCH  /api/notifications/:id/read');
-      console.log('  POST   /api/notifications');
-      console.log('  GET    /api/users');
-      console.log('  GET    /api/users/:id');
-      console.log('  POST   /api/users');
-      console.log('  PUT    /api/users/:id');
-      console.log('  GET    /api/approval-rules');
-      console.log('  POST   /api/approval-rules');
-      console.log('  PUT    /api/approval-rules/:id');
-      console.log('  DELETE /api/approval-rules/:id');
-      console.log('  GET    /api/activities');
-      console.log('  POST   /api/activities');
-      console.log('  GET    /api/dashboard/stats');
-      console.log('  GET    /api/settings/eco-stages');
-      console.log('  PUT    /api/settings/eco-stages');
-      console.log('  GET    /api/settings/rules');
-      console.log('  PUT    /api/settings/rules');
-      console.log('  GET    /api/health');
-      console.log('');
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error.message);
-    process.exit(1);
-  }
-};
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  
+  const startServer = async () => {
+    try {
+      await connectDB();
+      app.listen(PORT, () => {
+        console.log(`PLM Backend running on http://localhost:${PORT}`);
+        console.log(`CORS enabled for http://localhost:5173`);
+        console.log(`MongoDB connected\n`);
+        console.log('Available API Routes:');
+        console.log('  POST   /api/auth/login');
+        console.log('  GET    /api/auth/me');
+        console.log('  GET    /api/products');
+        console.log('  GET    /api/products/:id');
+        console.log('  GET    /api/boms');
+        console.log('  GET    /api/boms/:id');
+        console.log('  POST   /api/boms');
+        console.log('  GET    /api/ecos');
+        console.log('  GET    /api/ecos/:id');
+        console.log('  POST   /api/ecos');
+        console.log('  PATCH  /api/ecos/:id/stage');
+        console.log('  POST   /api/ecos/:id/reject');
+        console.log('  PATCH  /api/ecos/:id/images');
+        console.log('  PATCH  /api/ecos/:id/images/review/:imageChangeId');
+        console.log('  GET    /api/notifications');
+        console.log('  PATCH  /api/notifications/:id/read');
+        console.log('  POST   /api/notifications');
+        console.log('  GET    /api/users');
+        console.log('  GET    /api/users/:id');
+        console.log('  POST   /api/users');
+        console.log('  PUT    /api/users/:id');
+        console.log('  GET    /api/approval-rules');
+        console.log('  POST   /api/approval-rules');
+        console.log('  PUT    /api/approval-rules/:id');
+        console.log('  DELETE /api/approval-rules/:id');
+        console.log('  GET    /api/activities');
+        console.log('  POST   /api/activities');
+        console.log('  GET    /api/dashboard/stats');
+        console.log('  GET    /api/settings/eco-stages');
+        console.log('  PUT    /api/settings/eco-stages');
+        console.log('  GET    /api/settings/rules');
+        console.log('  PUT    /api/settings/rules');
+        console.log('  GET    /api/health');
+        console.log('');
+      });
+    } catch (error) {
+      console.error('Failed to start server:', error.message);
+      process.exit(1);
+    }
+  };
 
-startServer();
+  startServer();
+}

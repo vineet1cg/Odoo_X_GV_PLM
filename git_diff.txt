@@ -1,0 +1,7 @@
+M	Frontend/src/App.jsx
+M	Frontend/src/components/landing/CTASection.jsx
+M	Frontend/src/components/landing/Navbar.jsx
+M	Frontend/src/components/layout/Sidebar.jsx
+M	Frontend/src/context/AppContext.jsx
+A	Frontend/src/pages/Login.jsx
+M	Frontend/src/pages/Settings.jsx

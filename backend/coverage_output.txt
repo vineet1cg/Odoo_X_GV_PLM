@@ -1,0 +1,89 @@
+  console.log
+    MongoDB connected: localhost
+
+      at log (src/config/db.js:6:13)
+
+  console.log
+    [2026-03-21T11:33:08.641Z] POST /api/auth/login
+
+      at log (server.js:32:11)
+
+  console.log
+    [2026-03-21T11:33:08.664Z] POST /api/auth/login
+
+      at log (server.js:32:11)
+
+  console.log
+    [2026-03-21T11:33:08.673Z] POST /api/auth/login
+
+      at log (server.js:32:11)
+
+  console.log
+    [2026-03-21T11:33:08.963Z] POST /api/auth/login
+
+      at log (server.js:32:11)
+
+  console.log
+    [2026-03-21T11:33:09.241Z] GET /api/auth/me
+
+      at log (server.js:32:11)
+
+  console.log
+    [2026-03-21T11:33:09.249Z] GET /api/auth/me
+
+      at log (server.js:32:11)
+
+  console.log
+    [2026-03-21T11:33:09.255Z] GET /api/auth/me
+
+      at log (server.js:32:11)
+
+PASS src/tests/auth.test.js
+  Auth Endpoints
+    POST /api/auth/login
+      ΓêÜ should return 400 for missing credentials (48 ms)
+      ΓêÜ should return 401 for unknown email (11 ms)
+      ΓêÜ should return 401 for invalid credentials (289 ms)
+      ΓêÜ should return 200 and a token for valid credentials (278 ms)
+    GET /api/auth/me
+      ΓêÜ should return 401 if no token provided (8 ms)
+      ΓêÜ should return 401 for invalid token (6 ms)
+      ΓêÜ should return 200 and user data for valid token (10 ms)
+
+------------------------|---------|----------|---------|---------|---------------------------------------------------
+File                    | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                 
+------------------------|---------|----------|---------|---------|---------------------------------------------------
+All files               |   39.08 |     7.85 |   14.28 |   40.36 |                                                   
+ backend                |   42.04 |     12.5 |   16.66 |   42.04 |                                                   
+  server.js             |   42.04 |     12.5 |   16.66 |   42.04 | 48,52,56-58,67-118                                
+ backend/src/config     |   77.77 |      100 |     100 |   77.77 |                                                   
+  db.js                 |   77.77 |      100 |     100 |   77.77 | 9-10                                              
+ backend/src/middleware |   71.42 |       50 |   66.66 |   71.42 |                                                   
+  auth.js               |      85 |       70 |     100 |      85 | 22,39,50                                          
+  roles.js              |    37.5 |        0 |      50 |    37.5 | 3-17                                              
+ backend/src/models     |   76.66 |        0 |      20 |   77.96 |                                                   
+  Activity.js           |      80 |      100 |       0 |      80 | 39                                                
+  ApprovalRule.js       |      80 |      100 |       0 |      80 | 35                                                
+  BOM.js                |   85.71 |      100 |       0 |   85.71 | 54                                                
+  ECO.js                |      90 |      100 |       0 |      90 | 131                                               
+  Notification.js       |      80 |      100 |       0 |      80 | 34                                                
+  Product.js            |   85.71 |      100 |       0 |   85.71 | 80                                                
+  Setting.js            |     100 |      100 |     100 |     100 |                                                   
+  User.js               |   55.55 |        0 |      50 |   58.82 | 50-53,63-65                                       
+ backend/src/routes     |   29.24 |     4.19 |    6.97 |    30.6 |                                                   
+  activities.js         |   43.75 |        0 |       0 |   43.75 | 9-13,19-32                                        
+  approvalRules.js      |   23.25 |        0 |       0 |   26.31 | 10-14,20-32,38-54,60-67                           
+  auth.js               |   90.32 |     87.5 |     100 |   90.32 | 67,79,92                                          
+  boms.js               |   34.61 |        0 |       0 |   34.61 | 10-14,20-27,33-59                                 
+  dashboard.js          |      36 |        0 |       0 |    40.9 | 12-50                                             
+  ecos.js               |   12.06 |        0 |       0 |    12.5 | 11-19,29-78,84-94,102-169,177-205,211-224,232-261 
+  notifications.js      |      32 |        0 |       0 |      32 | 9-13,19-30,36-48                                  
+  products.js           |   31.81 |        0 |       0 |   31.81 | 9-17,23-33                                        
+  settings.js           |   31.25 |        0 |       0 |   31.25 | 10-17,23-36,42-49,55-68                           
+  users.js              |   21.27 |        0 |       0 |    23.8 | 10-14,20-27,33-50,56-74                           
+------------------------|---------|----------|---------|---------|---------------------------------------------------
+Test Suites: 1 passed, 1 total
+Tests:       7 passed, 7 total
+Snapshots:   0 total
+Time:        2.22 s
+Ran all test suites matching src/tests/auth.test.js.

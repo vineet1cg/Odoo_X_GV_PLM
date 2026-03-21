@@ -1,0 +1,5 @@
+1d6108f - RACHIT KAKKAD, 17 minutes ago : Merge pull request #10 from ChittHirpara/main
+2972d71 - HirparaChitt, 20 minutes ago : fix: audit frontend connections - fix sidebar dashboard links, landing page routing, and settings back-link
+e58f929 - HirparaChitt, 27 minutes ago : feat: connect landing page to login, resolve merge conflict, install gsap/r3f deps
+e111a21 - RACHIT KAKKAD, 40 minutes ago : Merge pull request #9 from rishirajsinh/main
+0cac28e - rishirajsinh, 40 minutes ago : Resolve merge conflict in useAnimatedNumber.js

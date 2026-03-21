@@ -1,0 +1,98 @@
+  console.log
+    MongoDB connected: localhost
+
+      at log (src/config/db.js:6:13)
+
+  console.log
+    [2026-03-21T11:29:58.757Z] POST /api/auth/login
+
+      at log (server.js:32:11)
+
+  console.log
+    [2026-03-21T11:29:58.783Z] POST /api/auth/login
+
+      at log (server.js:32:11)
+
+  console.log
+    [2026-03-21T11:29:59.068Z] POST /api/auth/login
+
+      at log (server.js:32:11)
+
+  console.log
+    [2026-03-21T11:29:59.341Z] GET /api/auth/me
+
+      at log (server.js:32:11)
+
+  console.log
+    [2026-03-21T11:29:59.349Z] GET /api/auth/me
+
+      at log (server.js:32:11)
+
+  console.log
+    [2026-03-21T11:29:59.356Z] GET /api/auth/me
+
+      at log (server.js:32:11)
+
+FAIL src/tests/auth.test.js
+  Auth Endpoints
+    POST /api/auth/login
+      ├ù should return 400 for missing credentials (38 ms)
+      ├ù should return 401 for invalid credentials (287 ms)
+      ΓêÜ should return 200 and a token for valid credentials (270 ms)
+    GET /api/auth/me
+      ΓêÜ should return 401 if no token provided (11 ms)
+      ΓêÜ should return 401 for invalid token (7 ms)
+      ├ù should return 200 and user data for valid token (11 ms)
+
+  ΓùÅ Auth Endpoints ΓÇ║ POST /api/auth/login ΓÇ║ should return 400 for missing credentials
+
+    expect(received).toBeDefined()
+
+    Received: undefined
+
+      30 |       expect(res.statusCode).toEqual(400);
+      31 |       expect(res.body.success).toBe(false);
+    > 32 |       expect(res.body.errors).toBeDefined();
+         |                               ^
+      33 |     });
+      34 |
+      35 |     it('should return 401 for invalid credentials', async () => {
+
+      at Object.toBeDefined (src/tests/auth.test.js:32:31)
+
+  ΓùÅ Auth Endpoints ΓÇ║ POST /api/auth/login ΓÇ║ should return 401 for invalid credentials
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: "Invalid credentials"
+    Received: "Invalid email or password"
+
+      43 |       expect(res.statusCode).toEqual(401);
+      44 |       expect(res.body.success).toBe(false);
+    > 45 |       expect(res.body.message).toEqual('Invalid credentials');
+         |                                ^
+      46 |     });
+      47 |
+      48 |     it('should return 200 and a token for valid credentials', async () => {
+
+      at Object.toEqual (src/tests/auth.test.js:45:32)
+
+  ΓùÅ Auth Endpoints ΓÇ║ GET /api/auth/me ΓÇ║ should return 200 and user data for valid token
+
+    TypeError: Cannot read properties of undefined (reading 'email')
+
+      90 |       expect(res.statusCode).toEqual(200);
+      91 |       expect(res.body.success).toBe(true);
+    > 92 |       expect(res.body.data.user.email).toEqual('rishi@plm.io');
+         |                                 ^
+      93 |     });
+      94 |   });
+      95 | });
+
+      at Object.email (src/tests/auth.test.js:92:33)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 3 passed, 6 total
+Snapshots:   0 total
+Time:        2.311 s
+Ran all test suites matching src/tests/auth.test.js.

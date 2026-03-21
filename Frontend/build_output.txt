@@ -1,0 +1,29 @@
+
+> odoo_offline@0.0.0 build
+> vite build
+
+[36mvite v8.0.1 [32mbuilding client environment for production...[36m[39m
+[2K
+Found 1 warning while optimizing generated CSS:
+
+Γöé   }
+Γöé }
+Γöé @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+Γöå        ^-- @import rules must precede all rules aside from @charset and @layer statements
+Γöå
+Γöé @layer base {
+Γöé   body {
+
+transforming...Γ£ô 3297 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                     0.86 kB Γöé gzip:   0.47 kB
+dist/assets/index-D4ODX-Ko.css     90.13 kB Γöé gzip:  14.26 kB
+dist/assets/index-BnMRepN0.js   1,948.33 kB Γöé gzip: 550.90 kB
+
+[32mΓ£ô built in 1.60s[39m
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
