@@ -23,7 +23,7 @@ export default function Settings() {
         <Shield size={40} className="text-surface-300 mb-4" />
         <p className="text-lg font-semibold text-surface-600 mb-2">Admin Access Required</p>
         <p className="text-sm text-surface-400 mb-4">Only administrators can access system settings.</p>
-        <Link to="/" className="text-sm text-primary-600 hover:underline">← Back to Dashboard</Link>
+        <Link to="/dashboard" className="text-sm text-primary-600 hover:underline">← Back to Dashboard</Link>
       </div>
     );
   }

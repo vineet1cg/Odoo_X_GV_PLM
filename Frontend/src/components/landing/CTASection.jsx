@@ -49,7 +49,7 @@ export default function CTASection() {
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-          <Link to="/dashboard">
+          <Link to="/login">
             <TealButton size="lg" glow className="w-full sm:w-auto">
               Start Free Trial <ArrowRight size={18} />
             </TealButton>

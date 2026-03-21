@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const roleNavMap = {
   'Admin': [
-    { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/users', icon: Users, label: 'User Management' },
     { to: '/eco-stages', icon: GitMerge, label: 'ECO Stages' },
     { to: '/rules', icon: ShieldCheck, label: 'Approval Rules' },
@@ -14,19 +14,19 @@ const roleNavMap = {
     { to: '/settings', icon: Settings, label: 'Settings' },
   ],
   'Engineering User': [
-    { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/products', icon: Package, label: 'Products' },
     { to: '/bom', icon: Layers, label: 'Bills of Materials' },
     { to: '/eco/create', icon: PlusCircle, label: 'Create ECO' },
     { to: '/eco', icon: FileText, label: 'My ECOs' },
   ],
   'Approver': [
-    { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/eco', icon: Inbox, label: 'Pending Approvals' },
     { to: '/reports', icon: BarChart3, label: 'Reports' },
   ],
   'Operations User': [
-    { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/products', icon: Package, label: 'Products (Active)' },
     { to: '/bom', icon: Layers, label: 'BoM (Active)' },
   ],
@@ -117,7 +117,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
         {filteredNav.map((item) => {
           const Icon = item.icon;
-          const isActive = item.to === '/' ? location.pathname === '/' : location.pathname.startsWith(item.to);
+          const isActive = item.to === '/dashboard' ? location.pathname === '/dashboard' : location.pathname.startsWith(item.to);
           return (
             <NavLink
               key={item.to}

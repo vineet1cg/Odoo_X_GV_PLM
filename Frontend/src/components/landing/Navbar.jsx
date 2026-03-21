@@ -59,7 +59,7 @@ export default function Navbar() {
           <Link to="/login" className="text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors">
             Sign In
           </Link>
-          <Link to="/dashboard">
+          <Link to="/login">
             <TealButton size="sm" glow>Get Started</TealButton>
           </Link>
         </div>
@@ -93,7 +93,7 @@ export default function Navbar() {
             <Link to="/login" className="w-full py-4 text-center rounded-lg border border-white/20 text-white font-medium">
               Sign In
             </Link>
-            <Link to="/dashboard">
+            <Link to="/login">
               <TealButton className="w-full py-4 justify-center" size="lg" glow>Get Started Now</TealButton>
             </Link>
           </div>
