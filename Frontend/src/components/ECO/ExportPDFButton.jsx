@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Download, Loader2 } from 'lucide-react';
 import { generateECOPdf } from '../../utils/pdfGenerator';
 import toast from 'react-hot-toast';
+import { secureGet } from '../../capacitor/nativeServices';
 
 export default function ExportPDFButton({ eco }) {
   const [loading, setLoading] = useState(false);
@@ -11,7 +12,7 @@ export default function ExportPDFButton({ eco }) {
     try {
       const res = await fetch(`http://localhost:5000/api/ecos/${eco.id}/export/pdf`, {
         headers: { 
-          'Authorization': `Bearer ${localStorage.getItem('token')}` 
+          'Authorization': `Bearer ${await secureGet('token')}` 
         }
       });
       const json = await res.json();

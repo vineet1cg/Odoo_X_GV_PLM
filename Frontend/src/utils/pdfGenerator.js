@@ -1,7 +1,8 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { Capacitor } from '@capacitor/core';
 
-export function generateECOPdf(eco, generatedBy) {
+export async function generateECOPdf(eco, generatedBy) {
   const doc = new jsPDF('p', 'mm', 'a4');
   const pageWidth = doc.internal.pageSize.width;
   const margin = 20;
@@ -326,6 +327,33 @@ export function generateECOPdf(eco, generatedBy) {
     );
   }
   
-  // Save the PDF
-  doc.save(`${eco.ecoNumber}-${(eco.title||'eco').replace(/\s+/g, '-')}.pdf`);
+  const filename = `${eco.ecoNumber}-${(eco.title||'eco').replace(/\s+/g, '-')}.pdf`;
+  
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const { Share } = await import('@capacitor/share');
+      const { Filesystem, Directory } = await import('@capacitor/filesystem');
+      const base64data = doc.output('datauristring').split(',')[1];
+      
+      const savedFile = await Filesystem.writeFile({
+        path: filename,
+        data: base64data,
+        directory: Directory.Cache
+      });
+      
+      await Share.share({
+        title: `ECO Report ${eco.ecoNumber}`,
+        text: 'Sharing ECO Report from PLM Flow',
+        url: savedFile.uri,
+        dialogTitle: 'Share ECO Report'
+      });
+    } catch (e) {
+      console.error('Failed to share native PDF: ', e);
+      alert('Error sharing PDF natively.');
+    }
+    return;
+  }
+  
+  // Save the PDF normally on web
+  doc.save(filename);
 }

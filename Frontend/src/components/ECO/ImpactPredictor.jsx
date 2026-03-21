@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowUpRight, ArrowDownRight, Minus, AlertTriangle, CheckCircle, ShieldAlert, Clock, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { secureGet } from '../../capacitor/nativeServices';
 
 export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
   const [impact, setImpact] = useState(null);
@@ -13,7 +14,7 @@ export default function ImpactPredictor({ ecoId, eco, onApprove, onReject }) {
     const fetchImpact = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('token');
+        const token = await secureGet('token');
         const res = await fetch(`http://localhost:5000/api/ecos/${ecoId}/impact`, {
           headers: {
             'Authorization': `Bearer ${token}`

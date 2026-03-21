@@ -11,6 +11,7 @@ import EmptyState from '../components/ui/EmptyState';
 import SLATimer from '../components/ECO/SLATimer';
 import { Search, FileText, Plus, ArrowUpRight, Filter, Paperclip, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { secureGet } from '../capacitor/nativeServices';
 
 export default function EcoList() {
   const { fetchPaginatedEcos, canCreateEco } = useApp();
@@ -65,7 +66,7 @@ export default function EcoList() {
     let isMounted = true;
     const fetchSla = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = await secureGet('token');
         const res = await fetch('http://localhost:5000/api/ecos/sla/status', {
           headers: { 'Authorization': `Bearer ${token}` }
         });

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Database, Activity, RefreshCw, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { secureGet } from '../../capacitor/nativeServices';
 
 export default function DBStatusBadge() {
   const [status, setStatus] = useState(null);
@@ -8,7 +9,7 @@ export default function DBStatusBadge() {
 
   useEffect(() => {
     const fetchStatus = async () => {
-      const token = localStorage.getItem('token');
+      const token = await secureGet('token');
       if (!token) return; // Don't poll if not logged in
       try {
         const res = await fetch('http://localhost:5000/api/db/status', {

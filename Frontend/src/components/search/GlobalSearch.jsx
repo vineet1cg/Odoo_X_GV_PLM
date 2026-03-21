@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, FileText, Package, Layers, ArrowRight, Loader2 } from 'lucide-react';
 import { useDebounce } from '../../hooks/useDebounce';
+import { secureGet } from '../../capacitor/nativeServices';
 
 export default function GlobalSearch({ open, setOpen }) {
   const [query, setQuery] = useState('');
@@ -43,7 +44,7 @@ export default function GlobalSearch({ open, setOpen }) {
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const token = localStorage.getItem('token');
+        const token = await secureGet('token');
         const res = await fetch(
           `http://localhost:5000/api/search?q=${encodeURIComponent(debouncedQuery)}`,
           { headers: { 'Authorization': `Bearer ${token}` } }

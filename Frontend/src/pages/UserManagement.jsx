@@ -3,6 +3,7 @@ import { Search, UserPlus, Shield, Mail, Filter, CheckCircle, X, Check, ChevronL
 import { ROLES } from '../data/mockData';
 import { sendWelcomeEmail } from '../services/emailService';
 import { motion, AnimatePresence } from 'framer-motion';
+import { secureGet } from '../capacitor/nativeServices';
 
 export default function UserManagement() {
   const [usersList, setUsersList] = useState([]);
@@ -33,7 +34,7 @@ export default function UserManagement() {
     const fetchUsers = async () => {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem('token');
+        const token = await secureGet('token');
         const res = await fetch(`http://localhost:5000/api/users?page=${page}&limit=${limit}&search=${encodeURIComponent(searchQuery)}&role=${encodeURIComponent(roleFilter)}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -78,7 +79,7 @@ export default function UserManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
+      const token = await secureGet('token');
       const method = editingUser ? 'PUT' : 'POST';
       const url = editingUser ? `http://localhost:5000/api/users/${editingUser._id || editingUser.id}` : 'http://localhost:5000/api/users';
       

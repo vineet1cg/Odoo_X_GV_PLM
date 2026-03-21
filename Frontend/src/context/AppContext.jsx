@@ -6,6 +6,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { users, products as initialProducts, boms as initialBoms, ecos as initialEcos, notifications as initialNotifications, ROLES } from '../data/mockData';
+import { secureSet, secureGet, secureRemove } from '../capacitor/nativeServices';
 
 const AppContext = createContext(null);
 
@@ -71,7 +72,7 @@ export function AppProvider({ children }) {
       });
       const data = await res.json();
       if (data.success) {
-        localStorage.setItem('token', data.data.token);
+        await secureSet('token', data.data.token);
         const apiUser = data.data.user;
         // Use the real user data from the API (role comes from DB)
         setCurrentUser({
@@ -93,8 +94,8 @@ export function AppProvider({ children }) {
     }
   }, [fetchAllData]);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('token');
+  const logout = useCallback(async () => {
+    await secureRemove('token');
     setIsAuthenticated(false);
     setCurrentUser(users[0]);
   }, []);
@@ -103,17 +104,17 @@ export function AppProvider({ children }) {
   //  SESSION RESTORE — Check token on mount   //
   // ==========================================//
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
-    // Validate token and restore session
-    fetch('http://localhost:5000/api/auth/me', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => {
+    const restoreSession = async () => {
+      const token = await secureGet('token');
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch('http://localhost:5000/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
         if (data.success && data.data) {
           setCurrentUser({
             id: data.data.id,
@@ -125,13 +126,15 @@ export function AppProvider({ children }) {
           setIsAuthenticated(true);
           fetchAllData(token);
         } else {
-          localStorage.removeItem('token');
+          await secureRemove('token');
         }
-      })
-      .catch(() => {
-        localStorage.removeItem('token');
-      })
-      .finally(() => setIsLoading(false));
+      } catch {
+        await secureRemove('token');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    restoreSession();
   }, [fetchAllData]);
 
   // ==========================================//
@@ -139,10 +142,9 @@ export function AppProvider({ children }) {
   // ==========================================//
   useEffect(() => {
     if (!isAuthenticated) return;
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
     const pollData = async () => {
+      const token = await secureGet('token');
+      if (!token) return;
       try {
         const headers = { 'Authorization': `Bearer ${token}` };
         const apiBase = 'http://localhost:5000/api';
@@ -177,16 +179,16 @@ export function AppProvider({ children }) {
   const canAccessSettings = currentUser.role === ROLES.ADMIN;
   const isReadOnly = currentUser.role === ROLES.OPERATIONS;
 
-  const authHeaders = () => ({
+  const authHeaders = async () => ({
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('token')}`
+    'Authorization': `Bearer ${await secureGet('token')}`
   });
 
   const addBom = useCallback(async (bom) => {
     try {
       const res = await fetch('http://localhost:5000/api/boms', {
         method: 'POST',
-        headers: authHeaders(),
+        headers: await authHeaders(),
         body: JSON.stringify(bom)
       });
       if (res.ok) {
@@ -202,7 +204,7 @@ export function AppProvider({ children }) {
       const payload = { ...eco, createdBy: currentUser.id };
       const res = await fetch('http://localhost:5000/api/ecos', {
         method: 'POST',
-        headers: authHeaders(),
+        headers: await authHeaders(),
         body: JSON.stringify(payload)
       });
       if (res.ok) {
@@ -217,7 +219,7 @@ export function AppProvider({ children }) {
     try {
       const res = await fetch(`http://localhost:5000/api/ecos/${ecoId}/stage`, {
         method: 'PATCH',
-        headers: authHeaders(),
+        headers: await authHeaders(),
         body: JSON.stringify({ stage: newStage, comment })
       });
       if (res.ok) {
@@ -238,7 +240,7 @@ export function AppProvider({ children }) {
     try {
       const res = await fetch(`http://localhost:5000/api/ecos/${ecoId}/reject`, {
         method: 'POST',
-        headers: authHeaders(),
+        headers: await authHeaders(),
         body: JSON.stringify({ comment })
       });
       if (res.ok) {
@@ -252,7 +254,7 @@ export function AppProvider({ children }) {
     try {
       const res = await fetch(`http://localhost:5000/api/ecos/${ecoId}/images`, {
         method: 'PATCH',
-        headers: authHeaders(),
+        headers: await authHeaders(),
         body: JSON.stringify({ attachedImages: images, imageChanges: [] }) // imageChanges syncs based on existing architecture
       });
       if (res.ok) {
@@ -266,7 +268,7 @@ export function AppProvider({ children }) {
     try {
       const res = await fetch(`http://localhost:5000/api/ecos/${ecoId}/images/review/${imageChangeId}`, {
         method: 'PATCH',
-        headers: authHeaders(),
+        headers: await authHeaders(),
         body: JSON.stringify({ status, comment })
       });
       if (res.ok) {
@@ -280,7 +282,7 @@ export function AppProvider({ children }) {
     try {
       const res = await fetch(`http://localhost:5000/api/notifications/${notifId}/read`, {
         method: 'PATCH',
-        headers: authHeaders()
+        headers: await authHeaders()
       });
       if (res.ok) {
         setNotificationList(prev => prev.map(n => n.id === notifId ? { ...n, read: true } : n));
@@ -292,7 +294,7 @@ export function AppProvider({ children }) {
     try {
       const query = new URLSearchParams(params).toString();
       const res = await fetch(`http://localhost:5000/api/ecos?${query}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { 'Authorization': `Bearer ${await secureGet('token')}` }
       });
       return await res.json();
     } catch (err) { return { success: false, message: err.message }; }
@@ -302,7 +304,7 @@ export function AppProvider({ children }) {
     try {
       const query = new URLSearchParams(params).toString();
       const res = await fetch(`http://localhost:5000/api/products?${query}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { 'Authorization': `Bearer ${await secureGet('token')}` }
       });
       return await res.json();
     } catch (err) { return { success: false, message: err.message }; }
@@ -312,7 +314,7 @@ export function AppProvider({ children }) {
     try {
       const query = new URLSearchParams(params).toString();
       const res = await fetch(`http://localhost:5000/api/boms?${query}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { 'Authorization': `Bearer ${await secureGet('token')}` }
       });
       return await res.json();
     } catch (err) { return { success: false, message: err.message }; }

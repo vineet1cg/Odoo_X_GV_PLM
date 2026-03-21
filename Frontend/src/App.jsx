@@ -5,6 +5,7 @@
 // ============================================================//
 import { useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import NetworkBanner from './components/NetworkBanner';
 import { AppProvider } from './context/AppContext';
 import Sidebar from './components/layout/Sidebar';
 import Topbar from './components/layout/Topbar';
@@ -142,6 +143,7 @@ function AppLayout() {
 export default function App() {
   return (
     <Router>
+      <NetworkBanner />
       <AppProvider>
         <AppLayout />
       </AppProvider>
