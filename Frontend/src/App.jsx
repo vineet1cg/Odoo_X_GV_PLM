@@ -3,29 +3,40 @@
 //  Landing page at '/' bypasses sidebar layout                //
 //  15 routes total, animated with Framer Motion               //
 // ============================================================//
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import Sidebar from './components/layout/Sidebar';
 import Topbar from './components/layout/Topbar';
-import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
-import Products from './pages/Products';
-import ProductDetail from './pages/ProductDetail';
-import BillOfMaterials from './pages/BillOfMaterials';
-import CreateBom from './pages/CreateBom';
-import BomDetail from './pages/BomDetail';
-import EcoList from './pages/EcoList';
-import CreateEco from './pages/CreateEco';
-import EcoDetail from './pages/EcoDetail';
-import Reports from './pages/Reports';
-import Settings from './pages/Settings';
-import UserManagement from './pages/UserManagement';
-import EcoStages from './pages/EcoStages';
-import ApprovalRules from './pages/ApprovalRules';
 import { useApp } from './context/AppContext';
 import { AnimatePresence, motion } from 'framer-motion';
+
+// ==========================================//
+//  LAZY LOADED PAGES — Code splitting       //
+// ==========================================//
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Products = lazy(() => import('./pages/Products'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const BillOfMaterials = lazy(() => import('./pages/BillOfMaterials'));
+const CreateBom = lazy(() => import('./pages/CreateBom'));
+const BomDetail = lazy(() => import('./pages/BomDetail'));
+const EcoList = lazy(() => import('./pages/EcoList'));
+const CreateEco = lazy(() => import('./pages/CreateEco'));
+const EcoDetail = lazy(() => import('./pages/EcoDetail'));
+const Reports = lazy(() => import('./pages/Reports'));
+const Settings = lazy(() => import('./pages/Settings'));
+const UserManagement = lazy(() => import('./pages/UserManagement'));
+const EcoStages = lazy(() => import('./pages/EcoStages'));
+const ApprovalRules = lazy(() => import('./pages/ApprovalRules'));
+
+// Loading fallback for lazy-loaded pages
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[40vh]">
+    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-600"></div>
+  </div>
+);
 
 // ==========================================//
 //  ANIMATED ROUTES — Page transitions       //
@@ -43,22 +54,24 @@ function AnimatedRoutes() {
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.2 }}
       >
-        <Routes location={location}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/products/:id" element={<ProductDetail />} />
-          <Route path="/bom" element={<BillOfMaterials />} />
-          <Route path="/bom/create" element={<CreateBom />} />
-          <Route path="/bom/:id" element={<BomDetail />} />
-          <Route path="/eco" element={<EcoList />} />
-          <Route path="/eco/create" element={<CreateEco />} />
-          <Route path="/eco/:id" element={<EcoDetail />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/users" element={<UserManagement />} />
-          <Route path="/eco-stages" element={<EcoStages />} />
-          <Route path="/rules" element={<ApprovalRules />} />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes location={location}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/products/:id" element={<ProductDetail />} />
+            <Route path="/bom" element={<BillOfMaterials />} />
+            <Route path="/bom/create" element={<CreateBom />} />
+            <Route path="/bom/:id" element={<BomDetail />} />
+            <Route path="/eco" element={<EcoList />} />
+            <Route path="/eco/create" element={<CreateEco />} />
+            <Route path="/eco/:id" element={<EcoDetail />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/users" element={<UserManagement />} />
+            <Route path="/eco-stages" element={<EcoStages />} />
+            <Route path="/rules" element={<ApprovalRules />} />
+          </Routes>
+        </Suspense>
       </motion.div>
     </AnimatePresence>
   );

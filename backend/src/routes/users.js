@@ -5,11 +5,37 @@ const roleMiddleware = require('../middleware/roles');
 
 const router = express.Router();
 
-// GET /api/users — List all users
+// GET /api/users — List all users (paginated with search)
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const users = await User.find().sort({ createdAt: -1 });
-    res.json({ success: true, data: users });
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+
+    const query = {};
+    if (req.query.search) {
+      query.$or = [
+        { name: { $regex: String(req.query.search), $options: 'i' } },
+        { email: { $regex: String(req.query.search), $options: 'i' } }
+      ];
+    }
+    if (req.query.role && req.query.role !== 'All') {
+      query.role = String(req.query.role);
+    }
+
+    const total = await User.countDocuments(query);
+    const users = await User.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json({ 
+      success: true, 
+      data: users,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit) || 1
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch users' });
   }

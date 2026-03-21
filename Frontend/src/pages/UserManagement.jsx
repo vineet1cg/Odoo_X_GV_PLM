@@ -1,14 +1,21 @@
-import { useState, useMemo } from 'react';
-import { Search, UserPlus, Shield, Mail, Filter, CheckCircle, X, Check } from 'lucide-react';
-import { users as initialUsers, ROLES } from '../data/mockData';
+import { useState, useEffect } from 'react';
+import { Search, UserPlus, Shield, Mail, Filter, CheckCircle, X, Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { ROLES } from '../data/mockData';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function UserManagement() {
-  const [localUsers, setLocalUsers] = useState(initialUsers);
+  const [usersList, setUsersList] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const limit = 5;
+
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -18,16 +25,36 @@ export default function UserManagement() {
   
   // Toast State
   const [toastMessage, setToastMessage] = useState('');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // Derived state for filtering
-  const filteredUsers = useMemo(() => {
-    return localUsers.filter(user => {
-      const matchSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          user.email.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchRole = roleFilter === 'All' || user.role === roleFilter;
-      return matchSearch && matchRole;
-    });
-  }, [localUsers, searchQuery, roleFilter]);
+  // Fetch from backend
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`http://localhost:5000/api/users?page=${page}&limit=${limit}&search=${encodeURIComponent(searchQuery)}&role=${encodeURIComponent(roleFilter)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setUsersList(data.data);
+          setTotalPages(data.totalPages);
+          setTotalUsers(data.total);
+        }
+      } catch (err) {
+        console.error('Failed to fetch users', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    const timeoutId = setTimeout(() => { fetchUsers(); }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [page, searchQuery, roleFilter, refreshTrigger]);
+
+  // Reset page when search/filter changes
+  useEffect(() => { setPage(1); }, [searchQuery, roleFilter]);
 
   const showToast = (message) => {
     setToastMessage(message);
@@ -47,26 +74,32 @@ export default function UserManagement() {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    
-    // Auto-generate avatar from initials
-    const avatar = formData.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U';
-
-    if (editingUser) {
-      setLocalUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, ...formData, avatar } : u));
-      showToast('User updated successfully');
-    } else {
-      const newUser = {
-        id: `u${Date.now()}`,
-        ...formData,
-        avatar
-      };
-      setLocalUsers(prev => [...prev, newUser]);
-      showToast('New user added successfully');
+    try {
+      const token = localStorage.getItem('token');
+      const method = editingUser ? 'PUT' : 'POST';
+      const url = editingUser ? `http://localhost:5000/api/users/${editingUser._id || editingUser.id}` : 'http://localhost:5000/api/users';
+      
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(editingUser ? 'User updated successfully' : 'New user added successfully');
+        setRefreshTrigger(prev => prev + 1);
+        setIsModalOpen(false);
+      } else {
+        showToast('Error: ' + data.message);
+      }
+    } catch (err) {
+      showToast('Action failed');
     }
-    setIsModalOpen(false);
   };
 
   return (
@@ -133,15 +166,24 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-100 bg-white">
-              {filteredUsers.length === 0 ? (
+              {isLoading ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-12 text-center text-surface-500">
-                    No users found matching your criteria.
+                    <div className="flex flex-col items-center justify-center space-y-3">
+                      <Loader2 className="animate-spin text-primary-600" size={24} />
+                      <p>Loading users...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : usersList.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="px-6 py-12 text-center text-surface-500">
+                    No Data Available.
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map(user => (
-                  <tr key={user.id} className="hover:bg-surface-50/50 transition-colors">
+                usersList.map(user => (
+                  <tr key={user.id || user._id} className="hover:bg-surface-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xs flex-shrink-0">{user.avatar}</div>
@@ -175,6 +217,34 @@ export default function UserManagement() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {!isLoading && totalUsers > 0 && (
+          <div className="px-6 py-4 border-t border-surface-200 bg-surface-50 flex items-center justify-between">
+            <p className="text-sm text-surface-500">
+              Showing <span className="font-medium text-surface-800">{(page - 1) * limit + 1}</span> to <span className="font-medium text-surface-800">{Math.min(page * limit, totalUsers)}</span> of <span className="font-medium text-surface-800">{totalUsers}</span> users
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="inline-flex items-center gap-1 px-3 py-1.5 border border-surface-300 rounded-lg text-sm font-medium text-surface-700 bg-white hover:bg-surface-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft size={16} /> Previous
+              </button>
+              <div className="px-3 py-1.5 text-sm font-medium text-surface-700">
+                Page {page} of {totalPages}
+              </div>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="inline-flex items-center gap-1 px-3 py-1.5 border border-surface-300 rounded-lg text-sm font-medium text-surface-700 bg-white hover:bg-surface-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Next <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Modal Overlay */}
