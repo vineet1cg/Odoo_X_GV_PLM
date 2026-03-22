@@ -5,7 +5,8 @@ import { users } from '../../data/mockData';
 import { useTranslation } from 'react-i18next';
 
 export default function AdminDashboard() {
-  const { t } = useTranslation();
+  const t = (key, opt) => i18n.t(key, opt);
+  
   return (
     <div className="space-y-8 animate-fade-in">
       <div>

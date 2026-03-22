@@ -4,16 +4,14 @@ import Card from '../../components/ui/Card';
 import StatusBadge from '../../components/ui/StatusBadge';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n/index';
 
 export default function ApproverDashboard() {
-  const { t, ready } = useTranslation();
+  const t = (key, opt) => i18n.t(key, opt);
   const { ecoList } = useApp();
 
   const pendingApprovals = (ecoList || []).filter(e => (e?.stage === 'Approval') || (e?.stage === 'In Review'));
   const urgentApprovals = pendingApprovals.filter(e => e?.priority === 'High');
-
-  if (!ready) return null;
 
   return (
     <div className="space-y-8 animate-fade-in">

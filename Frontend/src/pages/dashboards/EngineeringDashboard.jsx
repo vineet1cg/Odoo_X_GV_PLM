@@ -5,17 +5,15 @@ import Card from '../../components/ui/Card';
 import StatusBadge from '../../components/ui/StatusBadge';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n/index';
 
 export default function EngineeringDashboard() {
-  const { t, ready } = useTranslation();
+  const t = (key, opt) => i18n.t(key, opt);
   const { ecoList, canCreateEco } = useApp();
 
   const draftEcos = (ecoList || []).filter(e => e?.stage === 'Draft' || e?.stage === 'New');
   const inReviewEcos = (ecoList || []).filter(e => e?.stage === 'Approval' || e?.stage === 'In Review');
   const recentEditedEcos = (ecoList || []).filter(Boolean).slice(0, 5); 
-
-  if (!ready) return null;
 
   return (
     <div className="space-y-8 animate-fade-in">

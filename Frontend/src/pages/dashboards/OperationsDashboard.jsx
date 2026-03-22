@@ -6,8 +6,9 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 export default function OperationsDashboard() {
-  const { t } = useTranslation();
+  const t = (key, opt) => i18n.t(key, opt);
   const { products, bomList } = useApp();
+  
   const activeProducts = (products || []).filter(p => p?.status === 'Active');
   const activeBoms = (bomList || []).filter(b => b?.status === 'Active');
 

@@ -13,10 +13,11 @@ import { Search, FileText, Plus, ArrowUpRight, Filter, Paperclip, ChevronLeft, C
 import { motion } from 'framer-motion';
 import { secureGet } from '../capacitor/nativeServices';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n/index';
 import { API_BASE_URL } from '../config/api';
 
 export default function EcoList() {
-  const { t, ready } = useTranslation();
+  const t = (key, opt) => i18n.t(key, opt);
   const { fetchPaginatedEcos, canCreateEco } = useApp();
   const [ecos, setEcos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,10 +56,10 @@ export default function EcoList() {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (ready) fetchEcos();
+      fetchEcos();
     }, 400);
     return () => clearTimeout(timeoutId);
-  }, [fetchEcos, ready]);
+  }, [fetchEcos]);
 
   // Reset to page 1 when filter/search changes
   useEffect(() => {
@@ -87,8 +88,6 @@ export default function EcoList() {
     if (ecos.length > 0) fetchSla();
     return () => { isMounted = false; };
   }, [ecos]);
-
-  if (!ready) return null;
 
 
 

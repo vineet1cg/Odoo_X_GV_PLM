@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n/index';
 
 const statusStyles = {
   Active: 'bg-success-50 text-success-700 ring-success-500/20',
@@ -16,8 +16,8 @@ const statusStyles = {
 };
 
 export default function StatusBadge({ status, size = 'sm' }) {
-  const { t, ready } = useTranslation();
-  if (!ready || !status) return null;
+  const t = (key, opt) => i18n.t(key, opt);
+  if (!status) return null;
   
   const style = statusStyles[status] || 'bg-surface-100 text-surface-600 ring-surface-500/20';
   const sizeClass = size === 'lg' ? 'px-3 py-1 text-sm' : 'px-2 py-0.5 text-xs';
